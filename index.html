@@ -1816,13 +1816,13 @@ body.dark .leaflet-bar a:hover { background: #2a2d3a !important; }
           <select class="filter-select" id="log-group" onchange="renderLog()"><option value="">All groups</option></select>
         </div>
         <!-- Admin access button -->
-        <div id="log-admin-locked" style="display: none;">
+        <div id="log-admin-locked" style="display: block;">
           <button class="admin-access-btn" onclick="showLogAuth()">
             <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
             Admin access
           </button>
         </div>
-        <div id="log-admin-unlocked" style="display: block;">
+        <div id="log-admin-unlocked" style="display: none;">
           <div class="admin-active-bar">
             <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a4 4 0 0 1 7.51-1.5"></path></svg>
             Admin mode
@@ -3321,15 +3321,7 @@ function cancelLogAuth(){
   document.getElementById('log-pw-error').textContent = '';
 }
 async function checkLogPW(){
-  if(_authRole === 'admin') {
-    logAdmin = true;
-    document.getElementById('log-auth-prompt').style.display = 'none';
-    document.getElementById('log-admin-locked').style.display = 'none';
-    document.getElementById('log-admin-unlocked').style.display = 'block';
-    document.getElementById('log-th-actions').textContent = 'Actions';
-    renderLog();
-    return;
-  }
+  // No shortcut - always require password to unlock admin log
   const pw = document.getElementById('log-pw').value;
   try {
     const role = await checkPassword(pw);
@@ -5718,9 +5710,9 @@ window.addEventListener('hashchange', () => {
 // Restore session and boot app
 (async () => {
   await restoreSession();
-  if(_authToken && (_authRole === 'admin' || _authRole === 'agent')) {
+  if(_authRole === 'admin' || _authRole === 'agent') {
     authenticated = _authRole;
-    logAdmin = (_authRole === 'admin');
+    logAdmin = false; // always start locked - require explicit password entry
     livePostUnlocked = (_authRole === 'admin');
   }
   await loadAllData();
