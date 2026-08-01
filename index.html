@@ -1176,6 +1176,20 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
   .time-pills { gap: 5px; }
   .time-pill { padding: 5px 10px; font-size: 11px; }
   .date-range-row input { font-size: 12px; }
+
+  /* Counter tab */
+  .filter-select { min-width: 0; width: 100%; }
+  .counter-subtabs { gap: 5px; }
+  .counter-subtab { padding: 7px 12px; font-size: 11px; flex: 1 1 auto; text-align: center; }
+  .counter-filter-row { display: grid !important; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+  .counter-filter-row .date-range-input { width: 100%; }
+  .counter-filter-row .date-range-sep { display: none; }
+  .counter-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .counter-card { padding: 10px 10px; }
+  .counter-card-num { font-size: 16px; }
+  #counter-sub-compare > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  .compare-row { grid-template-columns: 1fr; text-align: center; gap: 4px; padding: 12px; }
+  .compare-val { font-size: 20px; }
 }
 </style>
 <script id="snapshot-loader">
@@ -1959,7 +1973,7 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <div class="an-card-title">Civilian Casualties</div>
           <div class="an-card-sub">Civilians killed/wounded across all logged incidents</div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div class="counter-filter-row" style="display:flex;gap:8px;flex-wrap:wrap;">
           <select class="filter-select" id="counter-civ-group" onchange="renderCivGrid()"><option value="">All groups</option></select>
           <select class="filter-select" id="counter-civ-province" onchange="onCounterCivProvinceChange()"><option value="">All provinces</option></select>
           <select class="filter-select" id="counter-civ-district" onchange="renderCivGrid()"><option value="">All districts</option></select>
@@ -1989,7 +2003,7 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <div class="an-card-title">Provinces &amp; Districts</div>
           <div class="an-card-sub">Every counter, filtered to a specific province and/or district</div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div class="counter-filter-row" style="display:flex;gap:8px;flex-wrap:wrap;">
           <select class="filter-select" id="counter-pd-province" onchange="onCounterProvinceChange()"><option value="">All provinces</option></select>
           <select class="filter-select" id="counter-pd-district" onchange="renderProvDistCounters()"><option value="">All districts</option></select>
           <input type="month" class="date-range-input" id="counter-pd-from" onchange="renderProvDistCounters()" placeholder="From month">
@@ -4663,6 +4677,7 @@ function renderProvDistCounters(){
 
   const statsEl = document.getElementById('counter-pd-stats');
   const breakdownEl = document.getElementById('counter-pd-breakdown');
+  const kiaLabel = unit ? `${esc(unit)} KIA` : 'GSF KIA';
 
   if(unit){
     // A specific PGSF unit doesn't have civilians/districts tied to it directly —
@@ -4706,7 +4721,6 @@ function renderProvDistCounters(){
     const provKeys = [...new Set([...Object.keys(kiaP),...Object.keys(neuP),...Object.keys(civP)])]
       .filter(p=>(kiaP[p]||0)>0||(neuP[p]||0)>0||(civP[p]||0)>0)
       .sort((a,b)=>((kiaP[b]||0)+(neuP[b]||0)+(civP[b]||0))-((kiaP[a]||0)+(neuP[a]||0)+(civP[a]||0)));
-    const kiaLabel = unit ? `${esc(unit)} KIA` : 'GSF KIA';
     provGrid.innerHTML = provKeys.length
       ? provKeys.map(p=>`
           <div class="counter-card">
