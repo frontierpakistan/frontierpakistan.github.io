@@ -631,6 +631,8 @@ td.td-action { width: 64px; text-align: right; padding: 6px 10px; white-space: n
   color: var(--text-secondary); letter-spacing: 0.03em;
 }
 .breakdown-add-btn { margin-top: 8px; }
+.load-more-row { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 16px; border-top: 1px solid var(--border); background: var(--surface); }
+.load-more-row .load-more-count { font-family: var(--mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.03em; }
 
 /* LAYOUT */
 .page { padding: 24px 28px; max-width: 1400px; }
@@ -1658,6 +1660,10 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
         <tbody id="kia-tbody"><tr class="empty-row"><td colspan="10">No records match the current filters.</td></tr></tbody>
       </table>
     </div>
+  <div class="load-more-row" id="kia-load-more" style="display:none;">
+    <span class="load-more-count"></span>
+    <button class="btn-secondary" onclick="loadMoreKia()">Load More</button>
+  </div>
   </div>
 
   <!-- ── AMAAN LASHKAR TAB ──────────────────────────────────── -->
@@ -1767,6 +1773,10 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
         <tbody id="ins-tbody"><tr class="empty-row"><td colspan="10">No records match the current filters.</td></tr></tbody>
       </table>
     </div>
+  <div class="load-more-row" id="ins-load-more" style="display:none;">
+    <span class="load-more-count"></span>
+    <button class="btn-secondary" onclick="loadMoreIns()">Load More</button>
+  </div>
   </div>
 
   <!-- ── INTELLIGENCE MAP TAB ───────────────────────────────── -->
@@ -2367,6 +2377,10 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
         <tbody id="log-tbody"><tr class="empty-row"><td colspan="13">No records match the current filters.</td></tr></tbody>
       </table>
     </div>
+  <div class="load-more-row" id="log-load-more" style="display:none;">
+    <span class="load-more-count"></span>
+    <button class="btn-secondary" onclick="loadMoreLog()">Load More</button>
+  </div>
   </div>
 
   <!-- ── TWEET MODAL ───────────────────────────────────────── -->
@@ -3095,13 +3109,27 @@ function addBreakdownRow(containerId, kind, prefill){
   container.insertAdjacentHTML('beforeend', renderBreakdownRow(kind, rowId, containerId, totalId));
   if(prefill){
     const row = container.querySelector(`[data-row-id="${rowId}"]`);
+    // Set a select's value, normalizing legacy naming (e.g. "FC (Frontier Corps)"
+    // from before the unit lists were merged) so it still matches a current
+    // option; if it genuinely matches nothing, add it as an extra option
+    // rather than silently leaving the dropdown blank
+    const setSelectValue = (select, rawVal) => {
+      if(!rawVal) return;
+      const normalized = normalizeUnitName(rawVal);
+      if([...select.options].some(o=>o.value===rawVal)){ select.value = rawVal; return; }
+      if([...select.options].some(o=>o.value===normalized)){ select.value = normalized; return; }
+      const opt = document.createElement('option');
+      opt.value = rawVal; opt.textContent = rawVal;
+      select.appendChild(opt);
+      select.value = rawVal;
+    };
     if(kind === 'kia'){
-      row.querySelector('.breakdown-type-select').value = prefill.type || '';
+      setSelectValue(row.querySelector('.breakdown-type-select'), prefill.type);
       row.querySelector('.breakdown-group-select').value = prefill.group || '';
       row.querySelector('.breakdown-kia').value = prefill.kia || '';
       row.querySelector('.breakdown-wia').value = prefill.wia || '';
     } else {
-      row.querySelector('.breakdown-unit-select').value = prefill.unit || '';
+      setSelectValue(row.querySelector('.breakdown-unit-select'), prefill.unit);
       row.querySelector('.breakdown-group-select').value = prefill.group || '';
       row.querySelector('.breakdown-kia').value = prefill.kia || '';
       row.querySelector('.breakdown-wia').value = prefill.wia || '';
@@ -3791,7 +3819,9 @@ function sortedData(data, s){
 }
 
 // ── RENDER KIA ─────────────────────────────────────────────────────────────────
-function renderKIA(){
+let kiaPageSize = 150;
+function renderKIA(isLoadMore){
+  if(!isLoadMore) kiaPageSize = 150;
   const q=document.getElementById('kia-search').value.toLowerCase();
   const prov=document.getElementById('kia-province').value;
   const evt=document.getElementById('kia-event').value;
@@ -3818,8 +3848,10 @@ function renderKIA(){
     <div class="stat-card"><div class="stat-label">Districts</div><div class="stat-value">${distCount}</div></div>`;
   document.getElementById('kia-count').textContent=rows.length+' record'+(rows.length!==1?'s':'');
   const tbody=document.getElementById('kia-tbody');
-  if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr>';return;}
-  tbody.innerHTML=rows.map(r=>{
+  const loadMoreEl=document.getElementById('kia-load-more');
+  if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr>';if(loadMoreEl)loadMoreEl.style.display='none';return;}
+  const visibleRows = rows.slice(0, kiaPageSize);
+  tbody.innerHTML=visibleRows.map(r=>{
     const groupDisplay = r.group
       ? `<span class="badge badge-group">${esc(r.group)}</span>`
       : ((r.groups||[]).length ? r.groups.map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' ') : '—');
@@ -3836,7 +3868,16 @@ function renderKIA(){
     <td class="td-details">${esc(r.details)||'—'}</td>
   </tr>`;
   }).join('');
+  if(loadMoreEl){
+    if(rows.length > kiaPageSize){
+      loadMoreEl.style.display = 'flex';
+      loadMoreEl.querySelector('.load-more-count').textContent = `Showing ${kiaPageSize} of ${rows.length}`;
+    } else {
+      loadMoreEl.style.display = 'none';
+    }
+  }
 }
+function loadMoreKia(){ kiaPageSize += 150; renderKIA(true); }
 
 // ── RENDER AMAAN LASHKAR ─────────────────────────────────────────────────────
 function renderLashkar(){
@@ -3901,7 +3942,9 @@ function renderLashkar(){
 }
 
 // ── RENDER INS ─────────────────────────────────────────────────────────────────
-function renderINS(){
+let insPageSize = 150;
+function renderINS(isLoadMore){
+  if(!isLoadMore) insPageSize = 150;
   const q=document.getElementById('ins-search').value.toLowerCase();
   const prov=document.getElementById('ins-province').value;
   const evt=document.getElementById('ins-event').value;
@@ -3928,8 +3971,10 @@ function renderINS(){
     <div class="stat-card"><div class="stat-label">Districts</div><div class="stat-value">${distCount}</div></div>`;
   document.getElementById('ins-count').textContent=rows.length+' record'+(rows.length!==1?'s':'');
   const tbody=document.getElementById('ins-tbody');
-  if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr>';return;}
-  tbody.innerHTML=rows.map(r=>`<tr>
+  const loadMoreEl=document.getElementById('ins-load-more');
+  if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr>';if(loadMoreEl)loadMoreEl.style.display='none';return;}
+  const visibleRows = rows.slice(0, insPageSize);
+  tbody.innerHTML=visibleRows.map(r=>`<tr>
     <td class="td-date">${esc(r.date)||'—'}</td>
     <td><span class="badge badge-province">${esc(r.province)||'—'}</span></td>
     <td>${esc(r.district)||'—'}</td>
@@ -3941,7 +3986,16 @@ function renderINS(){
     <td>${confidenceBadge(r.confidence)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
   </tr>`).join('');
+  if(loadMoreEl){
+    if(rows.length > insPageSize){
+      loadMoreEl.style.display = 'flex';
+      loadMoreEl.querySelector('.load-more-count').textContent = `Showing ${insPageSize} of ${rows.length}`;
+    } else {
+      loadMoreEl.style.display = 'none';
+    }
+  }
 }
+function loadMoreIns(){ insPageSize += 150; renderINS(true); }
 
 // ── TWEET MODAL ────────────────────────────────────────────────────────────────
 
@@ -4288,7 +4342,9 @@ function sortLog(col){
   renderLog();
 }
 
-function renderLog(){
+let logPageSize = 150;
+function renderLog(isLoadMore){
+  if(!isLoadMore) logPageSize = 150;
   const q = document.getElementById('log-search').value.toLowerCase();
   const type = document.getElementById('log-type').value;
   const prov = document.getElementById('log-province').value;
@@ -4319,12 +4375,15 @@ function renderLog(){
   document.getElementById('log-count').textContent = all.length+' record'+(all.length!==1?'s':'');
 
   const tbody = document.getElementById('log-tbody');
+  const loadMoreEl = document.getElementById('log-load-more');
   if(!all.length){
     tbody.innerHTML=`<tr class="empty-row"><td colspan="${logAdmin?'12':'11'}">No records match the current filters.</td></tr>`;
+    if(loadMoreEl) loadMoreEl.style.display='none';
     return;
   }
 
-  tbody.innerHTML = all.map(r=>{
+  const visibleRows = all.slice(0, logPageSize);
+  tbody.innerHTML = visibleRows.map(r=>{
     const groupDisplay = r.group
       ? `<span class="badge badge-group">${esc(r.group)}</span>`
       : ((r.groups||[]).length ? r.groups.map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' ') : '—');
@@ -4357,7 +4416,17 @@ function renderLog(){
     </td>` : ''}
   </tr>`;
   }).join('');
+
+  if(loadMoreEl){
+    if(all.length > logPageSize){
+      loadMoreEl.style.display = 'flex';
+      loadMoreEl.querySelector('.load-more-count').textContent = `Showing ${logPageSize} of ${all.length}`;
+    } else {
+      loadMoreEl.style.display = 'none';
+    }
+  }
 }
+function loadMoreLog(){ logPageSize += 150; renderLog(true); }
 
 // ── ANALYTICS ──────────────────────────────────────────────────────────────────
 
