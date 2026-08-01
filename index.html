@@ -5563,6 +5563,11 @@ function drawVBar(id,labels,datasets){
     ctx.textAlign='right'; ctx.textBaseline='middle';
     ctx.fillText(Math.round(max*i/4),pad.l-4,y);
   }
+  // With many months (multi-year data), drawing every single label would
+  // overlap into an unreadable mess — only draw as many as actually fit,
+  // evenly spaced, and always include the last one
+  const minLabelSpacing = 38; // px needed per label to stay legible
+  const labelStride = Math.max(1, Math.ceil(minLabelSpacing / groupW));
   labels.forEach((label,i)=>{
     const cx=pad.l+i*groupW+groupW/2;
     datasets.forEach((ds,di)=>{
@@ -5571,9 +5576,11 @@ function drawVBar(id,labels,datasets){
       const x=cx-(datasets.length*barW)/2+di*(barW+2);
       ctx.fillStyle=ds.color; ctx.fillRect(x,H-pad.b-bh,barW,bh);
     });
-    ctx.font='10px Public Sans,sans-serif'; ctx.fillStyle='#9c9a95';
-    ctx.textAlign='center'; ctx.textBaseline='top';
-    ctx.fillText(label.slice(2),cx,H-pad.b+4);
+    if(i % labelStride === 0 || i === labels.length-1){
+      ctx.font='10px Public Sans,sans-serif'; ctx.fillStyle='#9c9a95';
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText(label,cx,H-pad.b+4);
+    }
   });
   if(datasets.length>1){
     let lx=pad.l;
@@ -5669,11 +5676,16 @@ function drawTimeline(noData, kia, ins){
   [...kia,...ins].forEach(r=>{const k=monthKey(r.date);if(k&&!m[k])m[k]={kia:0,ins:0};});
   kia.forEach(r=>{const k=monthKey(r.date);if(k&&m[k])m[k].kia++;});
   ins.forEach(r=>{const k=monthKey(r.date);if(k&&m[k])m[k].ins++;});
-  const labels=sortedKeys(m);
-  if(!labels.length){emptyChart('an-timeline');return;}
+  const rawLabels=sortedKeys(m);
+  if(!rawLabels.length){emptyChart('an-timeline');return;}
+  const monthAbbr=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const labels = rawLabels.map(k=>{
+    const [yr,mo] = k.split('-');
+    return `${monthAbbr[parseInt(mo)-1]} '${yr.slice(2)}`;
+  });
   drawVBar('an-timeline',labels,[
-    {label:'Incidents KIA',values:labels.map(k=>m[k].kia),color:'#a13d3d'},
-    {label:'Insurgents',values:labels.map(k=>m[k].ins),color:'#5c7a52'}
+    {label:'Incidents KIA',values:rawLabels.map(k=>m[k].kia),color:'#a13d3d'},
+    {label:'Insurgents',values:rawLabels.map(k=>m[k].ins),color:'#5c7a52'}
   ]);
 }
 
@@ -5973,7 +5985,7 @@ function getFilteredMapData() {
       r.district && DISTRICT_COORDS[r.district] &&
       inDateRange(r.date||'',range) &&
       ((r.civ_killed||0) > 0 || (r.civ_wounded||0) > 0)
-    ).forEach(r=>out.push({...r, _type:'civ', kia:r.civ_killed||0, wia:r.civ_wounded||0}));
+    ).forEach(r=>out.push({...r, _type:'civ', _sourceType:r._recordType, kia:r.civ_killed||0, wia:r.civ_wounded||0}));
   }
   return out;
 }
@@ -5994,7 +6006,11 @@ function refreshMap() {
   document.getElementById('ms-kia').textContent = totalKIA;
   const msLashkarEl = document.getElementById('ms-lashkar'); if(msLashkarEl) msLashkarEl.textContent = totalLashkarKIA;
   document.getElementById('ms-neu').textContent = totalNeu;
-  document.getElementById('ms-inc').textContent = data.length;
+  // Count distinct underlying incidents, not raw marker pushes — a civilian
+  // casualty marker represents the same incident as its KIA/INS marker, not
+  // an additional one, so counting array length would double-count it
+  const uniqueIncidents = new Set(data.map(r => (r._type==='civ' ? r._sourceType||'kia' : r._type) + '-' + r.id));
+  document.getElementById('ms-inc').textContent = uniqueIncidents.size;
   document.getElementById('ms-dist').textContent = districts.size;
   const civEl = document.getElementById('ms-civ'); if(civEl) civEl.textContent = totalCivKIA;
 
@@ -6175,11 +6191,13 @@ function renderLiveFeed() {
   const older = document.getElementById('live-feed-older');
   if(!feed) return;
 
-  // Auto-generate items from recent incident data (last 20)
+  // Auto-generate items from incident data. The main ticker only shows the
+  // most recent 20, but we generate a much deeper pool so the "Previous
+  // Updates" archive can actually reflect years of history, not just
+  // whatever the 20 newest entries happen to span
   const autoItems = [];
   [...kiaData, ...insData]
     .sort((a,b) => (b.date||'').localeCompare(a.date||''))
-    .slice(0, 20)
     .forEach(r => {
       const isKIA = r._recordType === 'kia';
       const loc = r.district && r.province ? `${r.district}, ${r.province}` : r.district || r.province || 'Unknown location';
@@ -6325,7 +6343,7 @@ function renderLiveFeed() {
   }
 
   const mainItems = all.slice(0, 20);
-  const olderItems = all.slice(20, 50);
+  const olderItems = all.slice(20);
 
   feed.innerHTML = mainItems.map((item, i) => `
     <div class="live-item ${item.type}">
