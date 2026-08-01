@@ -6,8 +6,8 @@
 <!-- PWA: makes this installable as an app on phone home screens -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0a0a0a">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<link rel="apple-touch-icon" href="icons/icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Frontier Tracker">
@@ -152,10 +152,28 @@ body { font-family: var(--font); background: var(--bg); color: var(--text-primar
 .live-pill { display: flex; align-items: center; gap: 5px; font-size: 10px; color: rgba(255,255,255,0.4); font-family: var(--mono); letter-spacing: 0.05em; text-transform: uppercase; }
 .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #6b9b74; animation: livepulse 2s ease-in-out infinite; }
 .header-summary { display: flex; align-items: center; gap: 14px; margin-right: 4px; }
+.header-summary-mobile { display: none; }
 .header-stat { display: flex; align-items: center; gap: 5px; font-size: 10px; font-family: var(--mono); color: rgba(255,255,255,0.35); letter-spacing: 0.04em; text-transform: uppercase; }
 .header-stat-val { font-weight: 600; color: rgba(255,255,255,0.75); font-size: 12px; }
 .header-stat-sep { width: 1px; height: 10px; background: rgba(255,255,255,0.1); }
-@media (max-width:600px){ .header-summary { display:none; } }
+@media (max-width:600px){
+  .header-summary { display:none; }
+  .header-summary-mobile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #080b10;
+    border-bottom: 1px solid #1e2430;
+    padding: 7px 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+  .header-summary-mobile::-webkit-scrollbar { display: none; }
+  .header-summary-mobile .header-stat { flex-shrink: 0; }
+  .header-summary-mobile .header-stat-sep { flex-shrink: 0; }
+}
 
 /* TABS */
 .tab-nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 16px; display: flex; overflow-x: auto; scrollbar-width: none; }
@@ -1271,6 +1289,7 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
     <div class="header-clock" id="clock">19:25:43 UTC</div>
   </div>
 </header>
+<div id="header-summary-mobile" class="header-summary-mobile"></div>
 
 <nav class="tab-nav">
   <button class="tab-btn tab-live active" id="tab-live-btn" onclick="switchTab('live',this)">
@@ -6959,8 +6978,9 @@ function updateHeaderSummary() {
   const totalInc = pgsfEntries.length + insData.length; // matches Incidents tab, which now excludes Amaan Lashkar
   const totalCivKilled = kiaData.reduce((s,r)=>s+(r.civ_killed||0),0) + insData.reduce((s,r)=>s+(r.civ_killed||0),0);
   const el = document.getElementById('header-summary');
-  if(!el) return;
-  el.innerHTML = `
+  const elMobile = document.getElementById('header-summary-mobile');
+  if(!el && !elMobile) return;
+  const html = `
     <div class="header-stat"><span>Incidents</span><span class="header-stat-val">${totalInc}</span></div>
     <div class="header-stat-sep"></div>
     <div class="header-stat"><span>GSF KIA</span><span class="header-stat-val" style="color:#c99898">${totalKIA}</span></div>
@@ -6971,6 +6991,8 @@ function updateHeaderSummary() {
     <div class="header-stat-sep"></div>
     <div class="header-stat"><span>Civilian KIA</span><span class="header-stat-val" style="color:#c9b26a">${totalCivKilled}</span></div>
   `;
+  if(el) el.innerHTML = html;
+  if(elMobile) elMobile.innerHTML = html;
 }
 
 // ── ARTICLES ───────────────────────────────────────────────────────────────────
