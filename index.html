@@ -598,6 +598,40 @@ td.td-action { width: 64px; text-align: right; padding: 6px 10px; white-space: n
   border-radius: 2px;
 }
 
+/* ── PER-UNIT CASUALTY / NEUTRALIZATION BREAKDOWN ROWS ─────────────────── */
+.breakdown-rows { display: flex; flex-direction: column; gap: 8px; }
+.breakdown-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 90px 32px;
+  gap: 8px;
+  align-items: center;
+}
+.breakdown-row.breakdown-row-ins { grid-template-columns: 1fr 1fr 90px 90px 32px; }
+.breakdown-row select, .breakdown-row input[type="number"] {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 13px;
+}
+.breakdown-row input[type="number"] { font-family: var(--mono); }
+.breakdown-remove-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: 1px solid var(--border);
+  color: var(--text-muted); cursor: pointer;
+  transition: all 0.15s;
+}
+.breakdown-remove-btn:hover { border-color: #a13d3d; color: #a13d3d; }
+.breakdown-remove-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+.breakdown-total {
+  margin-top: 10px; font-family: var(--mono); font-size: 12px; font-weight: 600;
+  color: var(--text-secondary); letter-spacing: 0.03em;
+}
+.breakdown-add-btn { margin-top: 8px; }
+
 /* LAYOUT */
 .page { padding: 24px 28px; max-width: 1400px; }
 .tab-panel { display: none; }
@@ -2402,20 +2436,16 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <div class="form-grid">
             <div class="field"><label class="field-label">Event Type</label><select id="edit-event"><option value="">Select type</option></select></div>
             <div class="field" id="edit-group-field"><label class="field-label">Insurgent Group</label><select id="edit-group"><option value="">Select group</option><option>TTP</option><option>BLA</option><option>LEI</option><option>TTG</option><option>IMP</option><option>ISKP</option><option>BRAS</option><option>BLF</option><option>LeJ</option><option>SSP</option><option>AQIS</option><option>Other</option></select></div>
-            <div class="field" id="edit-unit-field"><label class="field-label">CI Unit</label><select id="edit-unit"><option value="">Select unit</option><option>FC</option><option>Levi</option><option>Army</option><option>Navy</option><option>Air Force</option><option>Police</option><option>CTD</option></select></div>
           </div>
         </div>
         <div class="form-section">
-          <div class="form-section-title">Casualties</div>
-          <div class="form-grid form-grid-2" style="max-width:420px;margin-bottom:14px;">
-            <div class="field"><label class="field-label">KIA</label><input type="number" id="edit-kia" min="0" placeholder="0"></div>
-            <div class="field"><label class="field-label">WIA</label><input type="number" id="edit-wia" min="0" placeholder="0"></div>
+          <div class="form-section-title" id="edit-breakdown-title">Casualties — per unit</div>
+          <div class="breakdown-rows" id="edit-breakdown-rows"></div>
+          <button type="button" class="ref-add-btn breakdown-add-btn" id="edit-breakdown-add-btn" onclick="addBreakdownRow('edit-breakdown-rows', document.getElementById('edit-type').value)">+ Add Row</button>
+          <div class="breakdown-total" id="edit-breakdown-total">Total: 0 KIA · 0 WIA</div>
+          <div class="form-grid form-grid-2" style="max-width:420px;margin-top:14px;">
             <div class="field"><label class="field-label">Civ Killed</label><input type="number" id="edit-civ-killed" min="0" placeholder="0"></div>
             <div class="field"><label class="field-label">Civ Wounded</label><input type="number" id="edit-civ-wounded" min="0" placeholder="0"></div>
-          </div>
-          <div class="field" id="edit-personnel-field">
-            <label class="field-label">Personnel Type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-muted);font-size:10px;">(select all that apply)</span></label>
-            <div class="personnel-grid" id="edit-personnel"></div>
           </div>
         </div>
         <div class="form-section">
@@ -2486,49 +2516,14 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <div class="form-section-title">Incident Details</div>
           <div class="form-grid form-grid-2">
             <div class="field"><label class="field-label">Event Type</label><select id="kf-event"><option value="">Select type</option><option>Armed Robbery</option><option>IED Explosion</option><option>Suicide Bombing</option><option>Drone Attack (Quadcopter)</option><option>FPV Drone Attack</option><option>Ambush</option><option>Raid</option><option>Checkpost Raid</option><option>Sabotage</option><option>Artillery Attack</option><option>Target Killing</option><option>Assassination</option><option>Kidnapping</option><option>Infrastructure Attack</option><option>Police Station Attack</option><option>Secterian Attack</option><option>Sniper fire</option><option>Other</option></select></div>
-            <div class="field"><label class="field-label">Insurgent Group</label><select id="kf-group"><option value="">Select group</option><option>TTP</option><option>BLA</option><option>LEI</option><option>TTG</option><option>IMP</option><option>ISKP</option><option>BRAS</option><option>BLF</option><option>LeJ</option><option>SSP</option><option>AQIS</option><option>Other</option></select></div>
           </div>
         </div>
         <div class="form-section">
-          <div class="form-section-title">Casualties</div>
-          <div class="form-grid form-grid-2" style="max-width:300px;margin-bottom:14px;">
-            <div class="field"><label class="field-label">KIA</label><input type="number" id="kf-kia" min="0" placeholder="0"></div>
-            <div class="field"><label class="field-label">WIA</label><input type="number" id="kf-wia" min="0" placeholder="0"></div>
-          </div>
-          <div class="field">
-            <label class="field-label">Personnel Type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-muted);font-size:10px;">(select all that apply)</span></label>
-            <div class="personnel-grid" id="kf-personnel"><div class="personnel-chip" data-val="Army" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>Army</span>
-    </div><div class="personnel-chip" data-val="FC (Frontier Corps)" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>FC (Frontier Corps)</span>
-    </div><div class="personnel-chip" data-val="Police" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>Police</span>
-    </div><div class="personnel-chip" data-val="CTD" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>CTD</span>
-    </div><div class="personnel-chip" data-val="Navy" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>Navy</span>
-    </div><div class="personnel-chip" data-val="Air Force" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>Air Force</span>
-    </div><div class="personnel-chip" data-val="Levies" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>Levies</span>
-    </div><div class="personnel-chip" data-val="Rangers" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>Rangers</span>
-    </div><div class="personnel-chip" data-val="Intelligence (ISI/IB/MI)" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>Intelligence (ISI/IB/MI)</span>
-    </div><div class="personnel-chip" data-val="Amaan Lashkar" onclick="this.classList.toggle('selected')">
-      <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"></polyline></svg></div>
-      <span>Amaan Lashkar</span>
-    </div></div>
-          </div>
+          <div class="form-section-title">Casualties — per unit &amp; group</div>
+          <div class="an-card-sub" style="margin-bottom:10px;">Add a row for each unit/group pairing — e.g. TTP hit FC (2 KIA) while ISKP hit Army (3 KIA) in the same coordinated attack</div>
+          <div class="breakdown-rows" id="kf-breakdown-rows"></div>
+          <button type="button" class="ref-add-btn breakdown-add-btn" onclick="addBreakdownRow('kf-breakdown-rows','kia')">+ Add Unit / Group</button>
+          <div class="breakdown-total" id="kf-breakdown-total">Total: 0 KIA · 0 WIA</div>
         </div>
         <div class="form-section">
           <div class="form-section-title">Narrative</div>
@@ -2567,16 +2562,14 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <div class="form-section-title">Operation Details</div>
           <div class="form-grid">
             <div class="field"><label class="field-label">Event Type</label><select id="inf-event"><option value="">Select type</option><option>Drone Attack (Quadcopter)</option><option>Explosion</option><option>Grenade</option><option>Ambush</option><option>Exchange of fire</option><option>IBO</option><option>Counter Attack</option><option>Sabotage</option><option>Target Killing</option><option>Capture</option><option>Sniper Fire</option><option>Ground Operation</option><option>Large Scale Operation</option><option>Patrol</option><option>Clearence Operation</option><option>Search Operation</option><option>Detention</option><option>Air to Ground Missile (PAF)</option><option>Artillery</option><option>Other</option></select></div>
-            <div class="field"><label class="field-label">CI Unit</label><select id="inf-unit"><option value="">Select unit</option><option>FC</option><option>Levi</option><option>Army</option><option>Navy</option><option>Air Force</option><option>Police</option><option>CTD</option></select></div>
-            <div class="field"><label class="field-label">Insurgent Group</label><select id="inf-group"><option value="">Select group</option><option>TTP</option><option>BLA</option><option>LEI</option><option>TTG</option><option>IMP</option><option>ISKP</option><option>BRAS</option><option>BLF</option><option>LeJ</option><option>SSP</option><option>AQIS</option><option>Other</option></select></div>
           </div>
         </div>
         <div class="form-section">
-          <div class="form-section-title">Casualties</div>
-          <div class="form-grid form-grid-2" style="max-width:300px;">
-            <div class="field"><label class="field-label">KIA</label><input type="number" id="inf-kia" min="0" placeholder="0"></div>
-            <div class="field"><label class="field-label">WIA</label><input type="number" id="inf-wia" min="0" placeholder="0"></div>
-          </div>
+          <div class="form-section-title">Units &amp; Groups Neutralized</div>
+          <div class="an-card-sub" style="margin-bottom:10px;">Add a row for each unit/group pairing — e.g. FC vs TTP and Army vs BLA in the same operation</div>
+          <div class="breakdown-rows" id="inf-breakdown-rows"></div>
+          <button type="button" class="ref-add-btn breakdown-add-btn" onclick="addBreakdownRow('inf-breakdown-rows','ins')">+ Add Unit / Group</button>
+          <div class="breakdown-total" id="inf-breakdown-total">Total: 0 Neutralized · 0 WIA</div>
         </div>
         <div class="form-section">
           <div class="form-section-title">Narrative</div>
@@ -2847,8 +2840,8 @@ async function loadAllData() {
     ]);
     if(kiaRes.error) throw kiaRes.error;
     if(insRes.error) throw insRes.error;
-    kiaData = kiaRes.data || [];
-    insData = insRes.data || [];
+    kiaData = (kiaRes.data || []).map(deriveKiaAggregates);
+    insData = (insRes.data || []).map(deriveInsAggregates);
     await loadRef();
     populateFilters();
     updateHeaderSummary();
@@ -2858,6 +2851,37 @@ async function loadAllData() {
     console.error('Load error:', err);
     showToast('Could not connect to database. Check your Supabase credentials.', 'error');
   }
+}
+
+// Every KIA entry now stores a per-unit breakdown array instead of a single
+// kia/wia/personnel value. This computes those aggregate fields from the
+// breakdown so every existing chart, counter, and filter (which all expect
+// r.kia / r.wia / r.personnel) keeps working without being rewritten.
+function deriveKiaAggregates(r){
+  const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+  r.kia = breakdown.reduce((s,b)=>s+(parseInt(b.kia)||0),0);
+  r.wia = breakdown.reduce((s,b)=>s+(parseInt(b.wia)||0),0);
+  r.personnel = [...new Set(breakdown.map(b=>b.type).filter(Boolean))];
+  // group used to be a single top-level field; now it's per-row too, since one
+  // coordinated attack can involve more than one group hitting different units
+  r.groups = [...new Set(breakdown.map(b=>b.group).filter(Boolean))];
+  if(!r.group && r.groups.length === 1) r.group = r.groups[0]; // legacy single-group convenience
+  r._recordType = 'kia';
+  return r;
+}
+
+// Same idea for INS entries — a single operation can now involve several
+// unit/group pairings, so unit and group become arrays (units/groups)
+// instead of a single value. Anywhere that used to check r.unit===X now
+// needs to check (r.units||[]).includes(X) instead.
+function deriveInsAggregates(r){
+  const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+  r.kia = breakdown.reduce((s,b)=>s+(parseInt(b.kia)||0),0);
+  r.wia = breakdown.reduce((s,b)=>s+(parseInt(b.wia)||0),0);
+  r.units = [...new Set(breakdown.map(b=>b.unit).filter(Boolean))];
+  r.groups = [...new Set(breakdown.map(b=>b.group).filter(Boolean))];
+  r._recordType = 'ins';
+  return r;
 }
 
 const PROVINCES = {
@@ -3006,7 +3030,9 @@ async function lockEntry(){
 
 // ── FORM HELPERS ───────────────────────────────────────────────────────────────
 function populateOpts(id, list, ph){
-  document.getElementById(id).innerHTML=`<option value="">${esc(ph)}</option>`+list.map(v=>`<option>${esc(v)}</option>`).join('');
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML=`<option value="">${esc(ph)}</option>`+list.map(v=>`<option>${esc(v)}</option>`).join('');
 }
 
 // Personnel grid — no checkboxes, pure div toggle to avoid label double-fire
@@ -3025,10 +3051,139 @@ function getSelectedPersonnel(containerId){
   return [...document.querySelectorAll(`#${containerId} .personnel-chip.selected`)].map(d=>d.dataset.val);
 }
 
+// ── PER-UNIT BREAKDOWN ROWS (Incidents & Insurgents Neutralized) ───────────
+let _breakdownRowSeq = 0;
+
+function renderBreakdownRow(kind, rowId, containerId, totalId){
+  const onChangeAttr = `onchange="updateBreakdownTotal('${containerId}','${totalId}','${kind}')"`;
+  const onInputAttr = `oninput="updateBreakdownTotal('${containerId}','${totalId}','${kind}')"`;
+  if(kind === 'kia'){
+    const types = getMergedList('personnel', PERSONNEL);
+    const groups = getMergedList('groups', GROUPS);
+    return `<div class="breakdown-row breakdown-row-ins" data-row-id="${rowId}">
+      <select class="breakdown-type-select" ${onChangeAttr}>
+        <option value="">Select unit</option>
+        ${types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}
+      </select>
+      <select class="breakdown-group-select" ${onChangeAttr}>
+        <option value="">Select group</option>
+        ${groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('')}
+      </select>
+      <input type="number" class="breakdown-kia" min="0" placeholder="KIA" ${onInputAttr}>
+      <input type="number" class="breakdown-wia" min="0" placeholder="WIA" ${onInputAttr}>
+      <button type="button" class="breakdown-remove-btn" onclick="removeBreakdownRow(this,'${containerId}','${totalId}','${kind}')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>`;
+  } else {
+    const units = getMergedList('units', INS_UNITS);
+    const groups = getMergedList('groups', GROUPS);
+    return `<div class="breakdown-row breakdown-row-ins" data-row-id="${rowId}">
+      <select class="breakdown-unit-select" ${onChangeAttr}>
+        <option value="">Select unit</option>
+        ${units.map(u=>`<option value="${esc(u)}">${esc(u)}</option>`).join('')}
+      </select>
+      <select class="breakdown-group-select" ${onChangeAttr}>
+        <option value="">Select group</option>
+        ${groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('')}
+      </select>
+      <input type="number" class="breakdown-kia" min="0" placeholder="Neu." ${onInputAttr}>
+      <input type="number" class="breakdown-wia" min="0" placeholder="WIA" ${onInputAttr}>
+      <button type="button" class="breakdown-remove-btn" onclick="removeBreakdownRow(this,'${containerId}','${totalId}','${kind}')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>`;
+  }
+}
+
+function addBreakdownRow(containerId, kind, prefill){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  const totalId = containerId.replace('-rows', '-total');
+  const rowId = 'row'+(_breakdownRowSeq++);
+  container.insertAdjacentHTML('beforeend', renderBreakdownRow(kind, rowId, containerId, totalId));
+  if(prefill){
+    const row = container.querySelector(`[data-row-id="${rowId}"]`);
+    if(kind === 'kia'){
+      row.querySelector('.breakdown-type-select').value = prefill.type || '';
+      row.querySelector('.breakdown-group-select').value = prefill.group || '';
+      row.querySelector('.breakdown-kia').value = prefill.kia || '';
+      row.querySelector('.breakdown-wia').value = prefill.wia || '';
+    } else {
+      row.querySelector('.breakdown-unit-select').value = prefill.unit || '';
+      row.querySelector('.breakdown-group-select').value = prefill.group || '';
+      row.querySelector('.breakdown-kia').value = prefill.kia || '';
+      row.querySelector('.breakdown-wia').value = prefill.wia || '';
+    }
+  }
+}
+
+function removeBreakdownRow(btn, containerId, totalId, kind){
+  const container = document.getElementById(containerId);
+  const row = btn.closest('.breakdown-row');
+  if(container.children.length <= 1){
+    // Keep at least one row — just clear it instead of removing entirely
+    row.querySelectorAll('select').forEach(s=>s.value='');
+    row.querySelectorAll('input[type="number"]').forEach(i=>i.value='');
+  } else {
+    row.remove();
+  }
+  updateBreakdownTotal(containerId, totalId, kind);
+}
+
+function updateBreakdownTotal(containerId, totalId, kind){
+  const container = document.getElementById(containerId);
+  const totalEl = document.getElementById(totalId);
+  if(!container || !totalEl) return;
+  let kia = 0, wia = 0;
+  container.querySelectorAll('.breakdown-row').forEach(row=>{
+    kia += parseInt(row.querySelector('.breakdown-kia').value) || 0;
+    wia += parseInt(row.querySelector('.breakdown-wia').value) || 0;
+  });
+  const label = kind === 'ins' ? 'Neutralized' : 'KIA';
+  totalEl.textContent = `Total: ${kia} ${label} · ${wia} WIA`;
+}
+
+// Reads all rows into a clean array, dropping rows where no unit/type was picked
+function getBreakdownData(containerId, kind){
+  const container = document.getElementById(containerId);
+  if(!container) return [];
+  const rows = [];
+  container.querySelectorAll('.breakdown-row').forEach(row=>{
+    const kia = parseInt(row.querySelector('.breakdown-kia').value) || 0;
+    const wia = parseInt(row.querySelector('.breakdown-wia').value) || 0;
+    if(kind === 'kia'){
+      const type = row.querySelector('.breakdown-type-select').value;
+      const group = row.querySelector('.breakdown-group-select').value;
+      if(type || group) rows.push({type, group, kia, wia});
+    } else {
+      const unit = row.querySelector('.breakdown-unit-select').value;
+      const group = row.querySelector('.breakdown-group-select').value;
+      if(unit || group) rows.push({unit, group, kia, wia});
+    }
+  });
+  return rows;
+}
+
+// Clears all rows and starts fresh with a single empty row (used after submit, and on form init)
+function resetBreakdownRows(containerId, totalId, kind, prefillRows){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  container.innerHTML = '';
+  if(prefillRows && prefillRows.length){
+    prefillRows.forEach(r=>addBreakdownRow(containerId, kind, r));
+  } else {
+    addBreakdownRow(containerId, kind);
+  }
+  updateBreakdownTotal(containerId, totalId, kind);
+}
+
 function initForms(){
   refreshAllDropdowns();
   const today=new Date().toISOString().slice(0,10);
   document.getElementById('kf-date').value=today;
+  if(document.getElementById('kf-breakdown-rows').children.length === 0) addBreakdownRow('kf-breakdown-rows','kia');
+  if(document.getElementById('inf-breakdown-rows').children.length === 0) addBreakdownRow('inf-breakdown-rows','ins');
   document.getElementById('inf-date').value=today;
 }
 function updateDistricts(pId, dId){
@@ -3078,11 +3233,11 @@ function getCivRows() {
         province: r.province || '',
         district: r.district || '',
         event:    r.event    || '',
-        group:    r.group    || '',
+        group:    r.group || (r.groups||[]).join(', ') || '',
         killed,
         wounded,
         details:  r.details  || '',
-        _source:  r.unit ? 'ins' : 'kia'
+        _source:  r._recordType || (r.unit ? 'ins' : 'kia')
       });
     }
   });
@@ -3286,6 +3441,20 @@ function normalizeUnitName(name){
   return stripped;
 }
 
+// An INS entry can now involve multiple units in one operation (r.units is
+// an array). This checks whether any of them match the given unit name,
+// replacing the old single-value r.unit===unitName comparisons.
+function insHasUnit(r, unitName){
+  return (r.units||[]).some(u=>normalizeUnitName(u)===normalizeUnitName(unitName));
+}
+// Same idea for groups — an INS entry can now involve multiple insurgent groups
+function insHasGroup(r, groupName){
+  return (r.groups||[]).includes(groupName);
+}
+// Alias — this now applies equally to KIA entries, since group moved
+// per-row there too (a coordinated attack can involve multiple groups)
+const hasGroup = insHasGroup;
+
 // Called by initForms and after any ref change — repopulates all dropdowns
 function refreshAllDropdowns() {
   const provs = Object.keys(getMergedProvinces());
@@ -3293,21 +3462,14 @@ function refreshAllDropdowns() {
   populateOpts('kf-province', provs, 'Select province');
   populateOpts('inf-province', provs, 'Select province');
   populateOpts('edit-province', provs, 'Select province');
-  // Groups
+  // Groups (used by Reference Data admin list; per-row selects in breakdown rows build their own options)
   const groups = getMergedList('groups', GROUPS);
-  populateOpts('kf-group', groups, 'Select group');
-  populateOpts('inf-group', groups, 'Select group');
-  populateOpts('edit-group', groups, 'Select group');
-  // Units
+  // Units (used by Reference Data admin list; per-row selects in breakdown rows build their own options)
   const units = getMergedList('units', INS_UNITS);
-  populateOpts('inf-unit', units, 'Select unit');
-  populateOpts('edit-unit', units, 'Select unit');
   // KIA events
   populateOpts('kf-event', getMergedList('kiaEvents', KIA_EVENTS), 'Select type');
   // INS events
   populateOpts('inf-event', getMergedList('insEvents', INS_EVENTS), 'Select type');
-  // Personnel grid
-  renderPersonnelGrid('kf-personnel');
   // Ref panel province selector
   const refProvSel = document.getElementById('ref-district-province');
   if(refProvSel) {
@@ -3444,20 +3606,21 @@ async function refDeleteItem(key, val) {
 
 // ── SUBMIT ─────────────────────────────────────────────────────────────────────
 async function submitKIA(){
-  const personnel = getSelectedPersonnel('kf-personnel');
+  const breakdown = getBreakdownData('kf-breakdown-rows','kia');
   const civKilled  = parseInt(document.getElementById('kf-civ-killed').value)||0;
   const civWounded = parseInt(document.getElementById('kf-civ-wounded').value)||0;
-  const e={date:document.getElementById('kf-date').value,province:document.getElementById('kf-province').value,district:document.getElementById('kf-district').value,event:document.getElementById('kf-event').value,kia:parseInt(document.getElementById('kf-kia').value)||0,wia:parseInt(document.getElementById('kf-wia').value)||0,group:document.getElementById('kf-group').value,personnel,details:document.getElementById('kf-details').value.trim(),civ_killed:civKilled,civ_wounded:civWounded,confidence:document.getElementById('kf-confidence').value};
+  const e={date:document.getElementById('kf-date').value,province:document.getElementById('kf-province').value,district:document.getElementById('kf-district').value,event:document.getElementById('kf-event').value,breakdown,details:document.getElementById('kf-details').value.trim(),civ_killed:civKilled,civ_wounded:civWounded,confidence:document.getElementById('kf-confidence').value};
   if(!e.date||!e.province||!e.district||!e.event){showNotice('kia-notice','Please complete all required fields.',true);return;}
+  if(!breakdown.length){showNotice('kia-notice','Add at least one unit/group with a KIA or WIA count.',true);return;}
   const btn = document.getElementById('kf-submit-btn');
   const originalText = btn.textContent;
   btn.disabled = true; btn.textContent = 'Submitting…';
   try {
     const {error} = await sb.from('kia_entries').insert([e]);
     if(error) throw error;
-    ['kf-kia','kf-wia','kf-details','kf-civ-killed','kf-civ-wounded'].forEach(id=>{document.getElementById(id).value=id.includes('civ')?'0':'';});
+    ['kf-details','kf-civ-killed','kf-civ-wounded'].forEach(id=>{document.getElementById(id).value=id.includes('civ')?'0':'';});
     document.getElementById('kf-confidence').value = 'Confirmed';
-    renderPersonnelGrid('kf-personnel');
+    resetBreakdownRows('kf-breakdown-rows','kf-breakdown-total','kia');
     await loadAllData();
     showNotice('kia-notice','Entry submitted successfully.',false);
   } catch(err) {
@@ -3467,18 +3630,21 @@ async function submitKIA(){
   }
 }
 async function submitINS(){
+  const breakdown = getBreakdownData('inf-breakdown-rows','ins');
   const civKilled  = parseInt(document.getElementById('inf-civ-killed').value)||0;
   const civWounded = parseInt(document.getElementById('inf-civ-wounded').value)||0;
-  const e={date:document.getElementById('inf-date').value,province:document.getElementById('inf-province').value,district:document.getElementById('inf-district').value,event:document.getElementById('inf-event').value,kia:parseInt(document.getElementById('inf-kia').value)||0,wia:parseInt(document.getElementById('inf-wia').value)||0,unit:document.getElementById('inf-unit').value,group:document.getElementById('inf-group').value,details:document.getElementById('inf-details').value.trim(),civ_killed:civKilled,civ_wounded:civWounded,confidence:document.getElementById('inf-confidence').value};
+  const e={date:document.getElementById('inf-date').value,province:document.getElementById('inf-province').value,district:document.getElementById('inf-district').value,event:document.getElementById('inf-event').value,breakdown,details:document.getElementById('inf-details').value.trim(),civ_killed:civKilled,civ_wounded:civWounded,confidence:document.getElementById('inf-confidence').value};
   if(!e.date||!e.province||!e.district||!e.event){showNotice('ins-notice','Please complete all required fields.',true);return;}
+  if(!breakdown.length){showNotice('ins-notice','Add at least one unit/group pairing with a count.',true);return;}
   const btn = document.getElementById('inf-submit-btn');
   const originalText = btn.textContent;
   btn.disabled = true; btn.textContent = 'Submitting…';
   try {
     const {error} = await sb.from('ins_entries').insert([e]);
     if(error) throw error;
-    ['inf-kia','inf-wia','inf-details','inf-civ-killed','inf-civ-wounded'].forEach(id=>{document.getElementById(id).value=id.includes('civ')?'0':'';});
+    ['inf-details','inf-civ-killed','inf-civ-wounded'].forEach(id=>{document.getElementById(id).value=id.includes('civ')?'0':'';});
     document.getElementById('inf-confidence').value = 'Confirmed';
+    resetBreakdownRows('inf-breakdown-rows','inf-breakdown-total','ins');
     await loadAllData();
     showNotice('ins-notice','Entry submitted successfully.',false);
   } catch(err) {
@@ -3501,12 +3667,12 @@ function populateFilters(){
   setOpts('kia-group',unique(kiaData,'group'),'All groups');
   setOpts('ins-province',unique(insData,'province'),'All provinces');
   setOpts('ins-event',unique(insData,'event'),'All events');
-  setOpts('ins-unit',unique(insData,'unit').filter(u=>normalizeUnitName(u)!=='Amaan Lashkar'),'All units');
-  setOpts('ins-group',unique(insData,'group'),'All groups');
+  setOpts('ins-unit',uniqueFlat(insData,'units').filter(u=>normalizeUnitName(u)!=='Amaan Lashkar'),'All units');
+  setOpts('ins-group',uniqueFlat(insData,'groups'),'All groups');
   // Amaan Lashkar filters (scoped to entries tagged with it)
   const lashkarData = [
     ...kiaData.filter(r=>(r.personnel||[]).includes('Amaan Lashkar')),
-    ...insData.filter(r=>normalizeUnitName(r.unit)==='Amaan Lashkar')
+    ...insData.filter(r=>insHasUnit(r,'Amaan Lashkar'))
   ];
   setOpts('lashkar-province',unique(lashkarData,'province'),'All provinces');
   setOpts('lashkar-event',unique(lashkarData,'event'),'All events');
@@ -3529,6 +3695,8 @@ function populateFilters(){
   if(document.getElementById('panel-deepan')?.classList.contains('active')) initDeepAnalysis();
 }
 function unique(data, key){ return [...new Set(data.map(r=>r[key]).filter(Boolean))].sort(); }
+// Same idea, but for fields that are now arrays (INS entries' units/groups)
+function uniqueFlat(data, key){ return [...new Set(data.flatMap(r=>r[key]||[]))].filter(Boolean).sort(); }
 function setOpts(id, list, ph){
   const sel=document.getElementById(id), cur=sel.value;
   sel.innerHTML=`<option value="">${ph}</option>`+list.map(v=>`<option value="${v}"${v===cur?' selected':''}>${v}</option>`).join('');
@@ -3641,7 +3809,7 @@ function renderKIA(){
     inDateRange(r.date,range)&&
     (!prov||r.province===prov)&&
     (!evt||r.event===evt)&&
-    (!grp||r.group===grp)&&
+    (!grp||r.group===grp||hasGroup(r,grp))&&
     (!pers||(r.personnel&&r.personnel.includes(pers)))&&
     (!q||JSON.stringify(r).toLowerCase().includes(q))
   );
@@ -3657,7 +3825,11 @@ function renderKIA(){
   document.getElementById('kia-count').textContent=rows.length+' record'+(rows.length!==1?'s':'');
   const tbody=document.getElementById('kia-tbody');
   if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr>';return;}
-  tbody.innerHTML=rows.map(r=>`<tr>
+  tbody.innerHTML=rows.map(r=>{
+    const groupDisplay = r.group
+      ? `<span class="badge badge-group">${esc(r.group)}</span>`
+      : ((r.groups||[]).length ? r.groups.map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' ') : '—');
+    return `<tr>
     <td class="td-date">${esc(r.date)||'—'}</td>
     <td><span class="badge badge-province">${esc(r.province)||'—'}</span></td>
     <td>${esc(r.district)||'—'}</td>
@@ -3665,10 +3837,11 @@ function renderKIA(){
     <td class="td-num ${r.kia?'danger':'muted'}">${r.kia??0}</td>
     <td class="td-num ${r.wia?'warning':'muted'}">${r.wia??0}</td>
     <td>${r.personnel&&r.personnel.length?`<div class="personnel-tags">${r.personnel.map(p=>`<span class="personnel-tag">${esc(p)}</span>`).join('')}</div>`:'—'}</td>
-    <td>${r.group?`<span class="badge badge-group">${esc(r.group)}</span>`:'—'}</td>
+    <td>${groupDisplay}</td>
     <td>${confidenceBadge(r.confidence)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
 }
 
 // ── RENDER AMAAN LASHKAR ─────────────────────────────────────────────────────
@@ -3683,7 +3856,7 @@ function renderLashkar(){
     inDateRange(r.date,range)&&
     (!prov||r.province===prov)&&
     (!evt||r.event===evt)&&
-    (!grp||r.group===grp)&&
+    (!grp||r.group===grp||insHasGroup(r,grp))&&
     (!q||JSON.stringify(r).toLowerCase().includes(q));
 
   // Two sources: KIA entries where Amaan Lashkar is tagged as personnel (their
@@ -3691,7 +3864,7 @@ function renderLashkar(){
   // neutralizing unit (their operations) — merged into one combined log
   let rows = [
     ...kiaData.filter(r=>(r.personnel||[]).includes('Amaan Lashkar')&&matches(r)).map(r=>({...r,_type:'kia'})),
-    ...insData.filter(r=>normalizeUnitName(r.unit)==='Amaan Lashkar'&&matches(r)).map(r=>({...r,_type:'ins'}))
+    ...insData.filter(r=>insHasUnit(r,'Amaan Lashkar')&&matches(r)).map(r=>({...r,_type:'ins'}))
   ];
   rows=sortedData(rows,lashkarSort);
 
@@ -3714,7 +3887,11 @@ function renderLashkar(){
   document.getElementById('lashkar-count').textContent=rows.length+' record'+(rows.length!==1?'s':'');
   const tbody=document.getElementById('lashkar-tbody');
   if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="10">No records match the current filters.</td></tr>';return;}
-  tbody.innerHTML=rows.map(r=>`<tr>
+  tbody.innerHTML=rows.map(r=>{
+    const groupDisplay = r._type==='kia'
+      ? (r.group?`<span class="badge badge-group">${esc(r.group)}</span>`:'—')
+      : ((r.groups||[]).length ? r.groups.map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' ') : '—');
+    return `<tr>
     <td class="td-date">${esc(r.date)||'—'}</td>
     <td><span class="badge ${r._type==='kia'?'badge-type-kia':'badge-type-ins'}">${r._type==='kia'?'Incident':'Neutralization'}</span></td>
     <td><span class="badge badge-province">${esc(r.province)||'—'}</span></td>
@@ -3722,10 +3899,11 @@ function renderLashkar(){
     <td>${esc(r.event)||'—'}</td>
     <td class="td-num ${r.kia?(r._type==='kia'?'danger':'success'):'muted'}">${r.kia??0}</td>
     <td class="td-num ${r.wia?'warning':'muted'}">${r.wia??0}</td>
-    <td>${r.group?`<span class="badge badge-group">${esc(r.group)}</span>`:'—'}</td>
+    <td>${groupDisplay}</td>
     <td>${confidenceBadge(r.confidence)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
 }
 
 // ── RENDER INS ─────────────────────────────────────────────────────────────────
@@ -3737,12 +3915,12 @@ function renderINS(){
   const grp=document.getElementById('ins-group').value;
   const range=getDateRange('ins');
   let rows=insData.filter(r=>
-    normalizeUnitName(r.unit)!=='Amaan Lashkar'&& // Amaan Lashkar's neutralizations have their own dedicated tab
+    !insHasUnit(r,'Amaan Lashkar')&& // Amaan Lashkar's neutralizations have their own dedicated tab
     inDateRange(r.date,range)&&
     (!prov||r.province===prov)&&
     (!evt||r.event===evt)&&
-    (!unit||r.unit===unit)&&
-    (!grp||r.group===grp)&&
+    (!unit||insHasUnit(r,unit))&&
+    (!grp||insHasGroup(r,grp))&&
     (!q||JSON.stringify(r).toLowerCase().includes(q))
   );
   rows=sortedData(rows,insSort);
@@ -3764,8 +3942,8 @@ function renderINS(){
     <td>${esc(r.event)||'—'}</td>
     <td class="td-num ${r.kia?'danger':'muted'}">${r.kia??0}</td>
     <td class="td-num ${r.wia?'warning':'muted'}">${r.wia??0}</td>
-    <td>${r.unit?`<span class="badge badge-unit">${esc(r.unit)}</span>`:'—'}</td>
-    <td>${r.group?`<span class="badge badge-group">${esc(r.group)}</span>`:'—'}</td>
+    <td>${(r.units||[]).length?(r.units||[]).map(u=>`<span class="badge badge-unit">${esc(u)}</span>`).join(' '):'—'}</td>
+    <td>${(r.groups||[]).length?(r.groups||[]).map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' '):'—'}</td>
     <td>${confidenceBadge(r.confidence)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
   </tr>`).join('');
@@ -3801,7 +3979,7 @@ function generateTweetText(type, record) {
   const event = record.event || '';
   const eventLower = event.toLowerCase();
   const vowel = ['a','e','i','o','u'].includes(eventLower[0]) ? 'n' : '';
-  const group = record.group || '';
+  const group = record.group || (record.groups||[]).join(', ') || '';
   const kia = record.kia || 0;
   const wia = record.wia || 0;
   const civK = record.civ_killed || 0;
@@ -3837,7 +4015,7 @@ function generateTweetText(type, record) {
     return tweet.slice(0, 280);
 
   } else {
-    const unit = record.unit || 'security forces';
+    const unit = record.unit || (record.units||[]).join(', ') || 'security forces';
     let tweet = '⚡ ';
     tweet += `${kia === 1 ? '1 insurgent' : kia+' insurgents'} neutralised by ${unit} in a${vowel} ${event} in ${location}`;
     if(wia > 0) tweet += `, ${wia} wounded`;
@@ -4013,13 +4191,13 @@ function openEditModal(type, id){
   const provs = Object.keys(getMergedProvinces());
   populateOpts('edit-province', provs, 'Select province');
   populateOpts('edit-event', type==='kia' ? getMergedList('kiaEvents',KIA_EVENTS) : getMergedList('insEvents',INS_EVENTS), 'Select type');
-  populateOpts('edit-group', getMergedList('groups',GROUPS), 'Select group');
-  populateOpts('edit-unit', getMergedList('units',INS_UNITS), 'Select unit');
 
-  // Show/hide unit + personnel fields based on type
-  document.getElementById('edit-unit-field').style.display = type==='ins' ? 'flex' : 'none';
-  document.getElementById('edit-personnel-field').style.display = type==='kia' ? 'block' : 'none';
-  if(type==='kia') renderPersonnelGrid('edit-personnel', record.personnel||[]);
+  // Group is now specified per-row in the breakdown for both types (a
+  // coordinated attack or operation can involve more than one group), so the
+  // old top-level group field is no longer used
+  document.getElementById('edit-group-field').style.display = 'none';
+  document.getElementById('edit-breakdown-title').textContent = type==='kia' ? 'Casualties — per unit & group' : 'Units & Groups Neutralized';
+  document.getElementById('edit-breakdown-add-btn').textContent = type==='kia' ? '+ Add Unit / Group' : '+ Add Unit / Group';
 
   // Fill values — set province first, populate districts, then set district
   document.getElementById('edit-date').value = record.date || '';
@@ -4030,14 +4208,14 @@ function openEditModal(type, id){
     document.getElementById('edit-district').value = record.district || '';
   }, 50);
   document.getElementById('edit-event').value = record.event || '';
-  document.getElementById('edit-group').value = record.group || '';
-  document.getElementById('edit-unit').value = record.unit || '';
-  document.getElementById('edit-kia').value = record.kia ?? '';
-  document.getElementById('edit-wia').value = record.wia ?? '';
   document.getElementById('edit-civ-killed').value = record.civ_killed ?? 0;
   document.getElementById('edit-civ-wounded').value = record.civ_wounded ?? 0;
   document.getElementById('edit-details').value = record.details || '';
   document.getElementById('edit-confidence').value = record.confidence || 'Confirmed';
+
+  // Rebuild the breakdown rows from this record's existing data
+  const existingBreakdown = Array.isArray(record.breakdown) ? record.breakdown : [];
+  resetBreakdownRows('edit-breakdown-rows','edit-breakdown-total', type, existingBreakdown);
 
   document.getElementById('edit-overlay').style.display = 'block';
   document.body.style.overflow = 'hidden';
@@ -4051,17 +4229,13 @@ function closeEditModal(){
 async function saveEdit(){
   const id = parseInt(document.getElementById('edit-id').value);
   const type = document.getElementById('edit-type').value;
-  const personnel = type==='kia' ? getSelectedPersonnel('edit-personnel') : [];
+  const breakdown = getBreakdownData('edit-breakdown-rows', type);
   const updated = {
     date: document.getElementById('edit-date').value,
     province: document.getElementById('edit-province').value,
     district: document.getElementById('edit-district').value,
     event: document.getElementById('edit-event').value,
-    group: document.getElementById('edit-group').value,
-    unit: document.getElementById('edit-unit').value,
-    personnel,
-    kia: parseInt(document.getElementById('edit-kia').value) || 0,
-    wia: parseInt(document.getElementById('edit-wia').value) || 0,
+    breakdown,
     civ_killed: parseInt(document.getElementById('edit-civ-killed').value) || 0,
     civ_wounded: parseInt(document.getElementById('edit-civ-wounded').value) || 0,
     details: document.getElementById('edit-details').value.trim(),
@@ -4069,6 +4243,9 @@ async function saveEdit(){
   };
   if(!updated.date||!updated.province||!updated.district||!updated.event){
     showToast('Please complete all required fields.', 'error'); return;
+  }
+  if(!breakdown.length){
+    showToast('Add at least one row with a unit selected.', 'error'); return;
   }
   const btn = document.getElementById('edit-save-btn');
   const originalText = btn.textContent;
@@ -4079,10 +4256,10 @@ async function saveEdit(){
     if(error) throw error;
     if(type==='kia'){
       const i=kiaData.findIndex(r=>String(r.id)===String(id));
-      if(i>-1) kiaData[i]={...kiaData[i],...updated};
+      if(i>-1) kiaData[i]=deriveKiaAggregates({...kiaData[i],...updated,group:undefined,groups:undefined,personnel:undefined});
     } else {
       const i=insData.findIndex(r=>String(r.id)===String(id));
-      if(i>-1) insData[i]={...insData[i],...updated};
+      if(i>-1) insData[i]=deriveInsAggregates({...insData[i],...updated,units:undefined,groups:undefined});
     }
     closeEditModal();
     populateFilters();
@@ -4134,7 +4311,7 @@ function renderLog(){
     inDateRange(r.date, range) &&
     (!type || r._type===type) &&
     (!prov || r.province===prov) &&
-    (!grp  || r.group===grp) &&
+    (!grp  || r.group===grp || insHasGroup(r,grp)) &&
     (!pers || (r.personnel && r.personnel.includes(pers))) &&
     (!q    || JSON.stringify(r).toLowerCase().includes(q))
   );
@@ -4153,7 +4330,14 @@ function renderLog(){
     return;
   }
 
-  tbody.innerHTML = all.map(r=>`<tr>
+  tbody.innerHTML = all.map(r=>{
+    const groupDisplay = r.group
+      ? `<span class="badge badge-group">${esc(r.group)}</span>`
+      : ((r.groups||[]).length ? r.groups.map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' ') : '—');
+    const unitDisplay = (r.units||[]).length
+      ? r.units.map(u=>`<span class="badge badge-unit">${esc(u)}</span>`).join(' ')
+      : '—';
+    return `<tr>
     <td class="td-date">${esc(r.date)||'—'}</td>
     <td><span class="badge ${r._type==='kia'?'badge-type-kia':'badge-type-ins'}">${r._type==='kia'?'Incidents':'Insurgents Neu.'}</span></td>
     <td><span class="badge badge-province">${esc(r.province)||'—'}</span></td>
@@ -4162,8 +4346,8 @@ function renderLog(){
     <td class="td-num ${r.kia?'danger':'muted'}">${r.kia??0}</td>
     <td class="td-num ${r.wia?'warning':'muted'}">${r.wia??0}</td>
     <td>${r.personnel&&r.personnel.length?`<div class="personnel-tags">${r.personnel.map(p=>`<span class="personnel-tag">${esc(p)}</span>`).join('')}</div>`:'—'}</td>
-    <td>${r.group?`<span class="badge badge-group">${esc(r.group)}</span>`:'—'}</td>
-    <td>${r.unit?`<span class="badge badge-unit">${esc(r.unit)}</span>`:'—'}</td>
+    <td>${groupDisplay}</td>
+    <td>${unitDisplay}</td>
     <td>${confidenceBadge(r.confidence)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
     ${logAdmin ? `<td class="td-action">
@@ -4177,7 +4361,8 @@ function renderLog(){
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </button>
     </td>` : ''}
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
 }
 
 // ── ANALYTICS ──────────────────────────────────────────────────────────────────
@@ -4360,22 +4545,38 @@ function renderCounter(){
   // ── By personnel branch (Army, FC, Police, etc.) ──────────────────────────
   const personnelTypes = getMergedList('personnel', PERSONNEL);
   const kiaByType = {}, wiaByType = {};
-  personnelTypes.forEach(t=>{ kiaByType[t]=0; wiaByType[t]=0; });
+  // What each unit has done TO the insurgents (neutralized/wounded), pulled
+  // from the Insurgents Neutralized side where that unit is credited.
+  // Both sides are keyed by normalizeUnitName() since the Incidents form's
+  // personnel list ("FC (Frontier Corps)") and the Insurgents form's unit
+  // list ("FC") use different exact strings for the same real unit.
+  const neuByUnit = {}, neuWiaByUnit = {};
+  personnelTypes.forEach(t=>{ const nt=normalizeUnitName(t); kiaByType[nt]=0; wiaByType[nt]=0; neuByUnit[nt]=0; neuWiaByUnit[nt]=0; });
   allKIA.forEach(r=>{
-    if(!(r.personnel||[]).length){
-      // No personnel tagged at all — surface this instead of letting it silently
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    if(!breakdown.length){
+      // No breakdown at all — surface this instead of letting it silently
       // vanish from the branch breakdown (it still counts in the true total)
       kiaByType['Unattributed'] = (kiaByType['Unattributed']||0) + (r.kia||0);
       wiaByType['Unattributed'] = (wiaByType['Unattributed']||0) + (r.wia||0);
       return;
     }
-    r.personnel.forEach(p=>{
-      if(!(p in kiaByType)){ kiaByType[p]=0; wiaByType[p]=0; }
-      kiaByType[p] += (r.kia||0);
-      wiaByType[p] += (r.wia||0);
+    breakdown.forEach(b=>{
+      const t = normalizeUnitName(b.type) || 'Unattributed';
+      if(!(t in kiaByType)){ kiaByType[t]=0; wiaByType[t]=0; }
+      kiaByType[t] += (parseInt(b.kia)||0);
+      wiaByType[t] += (parseInt(b.wia)||0);
     });
   });
-  _counterPGSF = { kia: kiaByType, wia: wiaByType, trueTotalKIA: totalKIA, trueTotalWIA: totalWIA };
+  allINS.forEach(r=>{
+    (Array.isArray(r.breakdown) ? r.breakdown : []).forEach(b=>{
+      const u = normalizeUnitName(b.unit) || 'Unattributed';
+      if(!(u in neuByUnit)){ neuByUnit[u]=0; neuWiaByUnit[u]=0; }
+      neuByUnit[u] += (parseInt(b.kia)||0);
+      neuWiaByUnit[u] += (parseInt(b.wia)||0);
+    });
+  });
+  _counterPGSF = { kia: kiaByType, wia: wiaByType, neu: neuByUnit, neuWia: neuWiaByUnit, trueTotalKIA: totalKIA, trueTotalWIA: totalWIA };
 
   // Populate the unit filter dropdown (excluding Amaan Lashkar, which has its own section)
   const pgsfFilter = document.getElementById('counter-pgsf-filter');
@@ -4411,14 +4612,43 @@ function renderCounter(){
   // ── By insurgent group ─────────────────────────────────────────────────────
   const groupTypes = getMergedList('groups', GROUPS);
   const neuByGroup = {}, insWiaByGroup = {};
-  groupTypes.forEach(g=>{ neuByGroup[g]=0; insWiaByGroup[g]=0; });
+  // Also tally what each group did TO the security forces (KIA/WIA inflicted),
+  // pulled from the Incidents side where the group is the attacker
+  const gsfKiaByGroup = {}, gsfWiaByGroup = {};
+  groupTypes.forEach(g=>{ neuByGroup[g]=0; insWiaByGroup[g]=0; gsfKiaByGroup[g]=0; gsfWiaByGroup[g]=0; });
   allINS.forEach(r=>{
-    const g = r.group || 'Unattributed';
-    if(!(g in neuByGroup)){ neuByGroup[g]=0; insWiaByGroup[g]=0; }
-    neuByGroup[g] += (r.kia||0);
-    insWiaByGroup[g] += (r.wia||0);
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    if(!breakdown.length){
+      const g = 'Unattributed';
+      if(!(g in neuByGroup)){ neuByGroup[g]=0; insWiaByGroup[g]=0; }
+      neuByGroup[g] += (r.kia||0);
+      insWiaByGroup[g] += (r.wia||0);
+      return;
+    }
+    breakdown.forEach(b=>{
+      const g = b.group || 'Unattributed';
+      if(!(g in neuByGroup)){ neuByGroup[g]=0; insWiaByGroup[g]=0; }
+      neuByGroup[g] += (parseInt(b.kia)||0);
+      insWiaByGroup[g] += (parseInt(b.wia)||0);
+    });
   });
-  _counterGroups = { neu: neuByGroup, wia: insWiaByGroup };
+  allKIA.forEach(r=>{
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    if(!breakdown.length){
+      const g = 'Unattributed';
+      if(!(g in gsfKiaByGroup)){ gsfKiaByGroup[g]=0; gsfWiaByGroup[g]=0; }
+      gsfKiaByGroup[g] += (r.kia||0);
+      gsfWiaByGroup[g] += (r.wia||0);
+      return;
+    }
+    breakdown.forEach(b=>{
+      const g = b.group || 'Unattributed';
+      if(!(g in gsfKiaByGroup)){ gsfKiaByGroup[g]=0; gsfWiaByGroup[g]=0; }
+      gsfKiaByGroup[g] += (parseInt(b.kia)||0);
+      gsfWiaByGroup[g] += (parseInt(b.wia)||0);
+    });
+  });
+  _counterGroups = { neu: neuByGroup, wia: insWiaByGroup, gsfKia: gsfKiaByGroup, gsfWia: gsfWiaByGroup };
 
   const groupsFilter = document.getElementById('counter-groups-filter');
   const prevGroupVal = groupsFilter.value;
@@ -4494,7 +4724,7 @@ function renderCivGrid(){
   const province = document.getElementById('counter-civ-province').value;
   const district = document.getElementById('counter-civ-district').value;
 
-  const matches = r => (!province || r.province===province) && (!district || r.district===district) && (!group || r.group===group);
+  const matches = r => (!province || r.province===province) && (!district || r.district===district) && (!group || r.group===group || insHasGroup(r,group));
   const civ = _counterAllCiv.filter(matches);
   const kiaInc = _counterAllKIA.filter(matches);
   const insInc = _counterAllINS.filter(matches);
@@ -4525,7 +4755,7 @@ function renderCivGrid(){
     const insByGroupScope = _counterAllINS.filter(groupScope);
     const killedByGroup = {}, woundedByGroup = {};
     civByGroupScope.forEach(r=>{ const g=r.group||'Unattributed'; killedByGroup[g]=(killedByGroup[g]||0)+(r.killed||0); woundedByGroup[g]=(woundedByGroup[g]||0)+(r.wounded||0); });
-    [...kiaByGroupScope,...insByGroupScope].forEach(r=>{ const g=r.group||'Unattributed'; killedByGroup[g]=(killedByGroup[g]||0)+(r.civ_killed||0); woundedByGroup[g]=(woundedByGroup[g]||0)+(r.civ_wounded||0); });
+    [...kiaByGroupScope,...insByGroupScope].forEach(r=>{ const g=r.group||(r.groups||[]).join(', ')||'Unattributed'; killedByGroup[g]=(killedByGroup[g]||0)+(r.civ_killed||0); woundedByGroup[g]=(woundedByGroup[g]||0)+(r.civ_wounded||0); });
     const groupKeys = Object.keys(killedByGroup).filter(g=>killedByGroup[g]>0||woundedByGroup[g]>0).sort((a,b)=>killedByGroup[b]-killedByGroup[a]);
     document.getElementById('counter-civ-group-grid').innerHTML = groupKeys.length
       ? groupKeys.map(g=>`
@@ -4545,7 +4775,7 @@ function renderCivGrid(){
   } else {
     document.getElementById('counter-civ-province-heading').style.display = 'block';
     document.getElementById('counter-civ-province-grid').style.display = 'grid';
-    const provScope = r => !group || r.group===group;
+    const provScope = r => !group || r.group===group || insHasGroup(r,group);
     const civByProvScope = _counterAllCiv.filter(provScope);
     const kiaByProvScope = _counterAllKIA.filter(provScope);
     const insByProvScope = _counterAllINS.filter(provScope);
@@ -4781,7 +5011,7 @@ function renderProvDistCounters(){
       && (!district || r.district===district)
       && (!fromMonth || ym>=fromMonth)
       && (!toMonth   || ym<=toMonth)
-      && (!group || r.group===group);
+      && (!group || r.group===group || insHasGroup(r,group));
   };
 
   // Unit only applies to records that actually carry personnel/unit info.
@@ -4790,14 +5020,53 @@ function renderProvDistCounters(){
   // exclude Amaan Lashkar from the general "PGSF KIA" figure — it's tracked
   // as its own category site-wide, same as everywhere else in the app.
   const pdKIA = kiaData.filter(r => baseMatch(r) && (unit ? (r.personnel||[]).some(p=>normalizeUnitName(p)===unit) : !(r.personnel||[]).includes('Amaan Lashkar')));
-  const pdINS = insData.filter(r => baseMatch(r) && (!unit || normalizeUnitName(r.unit)===unit));
+  const pdINS = insData.filter(r => baseMatch(r) && (!unit || insHasUnit(r,unit)));
   // Standalone civilian entries have no personnel/unit field, so a unit filter excludes them
   const pdCiv = civData.filter(r => baseMatch(r) && !unit);
 
-  const kia = pdKIA.reduce((s,r)=>s+(r.kia||0),0);
-  const wia = pdKIA.reduce((s,r)=>s+(r.wia||0),0);
-  const neu = pdINS.reduce((s,r)=>s+(r.kia||0),0);
-  const insWia = pdINS.reduce((s,r)=>s+(r.wia||0),0);
+  // When a unit and/or group filter is active, only count that filter's
+  // actual share of each entry's breakdown — not the whole entry's total,
+  // since one incident can now involve multiple units and/or groups
+  const kiaShare = r => {
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    if((unit || group) && breakdown.length){
+      return breakdown
+        .filter(b => (!unit || normalizeUnitName(b.type)===unit) && (!group || b.group===group))
+        .reduce((s,b)=>s+(parseInt(b.kia)||0),0);
+    }
+    return r.kia||0;
+  };
+  const wiaShare = r => {
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    if((unit || group) && breakdown.length){
+      return breakdown
+        .filter(b => (!unit || normalizeUnitName(b.type)===unit) && (!group || b.group===group))
+        .reduce((s,b)=>s+(parseInt(b.wia)||0),0);
+    }
+    return r.wia||0;
+  };
+  const kia = pdKIA.reduce((s,r)=>s+kiaShare(r),0);
+  const wia = pdKIA.reduce((s,r)=>s+wiaShare(r),0);
+  const insKiaShare = r => {
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    if((unit || group) && breakdown.length){
+      return breakdown
+        .filter(b => (!unit || normalizeUnitName(b.unit)===unit) && (!group || b.group===group))
+        .reduce((s,b)=>s+(parseInt(b.kia)||0),0);
+    }
+    return r.kia||0;
+  };
+  const insWiaShare = r => {
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    if((unit || group) && breakdown.length){
+      return breakdown
+        .filter(b => (!unit || normalizeUnitName(b.unit)===unit) && (!group || b.group===group))
+        .reduce((s,b)=>s+(parseInt(b.wia)||0),0);
+    }
+    return r.wia||0;
+  };
+  const neu = pdINS.reduce((s,r)=>s+insKiaShare(r),0);
+  const insWia = pdINS.reduce((s,r)=>s+insWiaShare(r),0);
   const civKilled  = pdCiv.reduce((s,r)=>s+(r.killed||0),0)  + [...pdKIA,...pdINS].reduce((s,r)=>s+(r.civ_killed||0),0);
   const civWounded = pdCiv.reduce((s,r)=>s+(r.wounded||0),0) + [...pdKIA,...pdINS].reduce((s,r)=>s+(r.civ_wounded||0),0);
   const incidents = pdKIA.length + pdINS.length + pdCiv.length;
@@ -4902,10 +5171,12 @@ function renderProvDistCounters(){
         document.getElementById('counter-pd-unit-breakdowns').style.display = 'block';
         const unitKia = {}, unitWia = {};
         pdKIA.forEach(r=>{
-          (r.personnel||[]).forEach(p=>{
-            const u = normalizeUnitName(p);
-            unitKia[u] = (unitKia[u]||0) + (r.kia||0);
-            unitWia[u] = (unitWia[u]||0) + (r.wia||0);
+          (Array.isArray(r.breakdown) ? r.breakdown : []).forEach(b=>{
+            if(b.group !== group) return;
+            const u = normalizeUnitName(b.type);
+            if(!u) return;
+            unitKia[u] = (unitKia[u]||0) + (parseInt(b.kia)||0);
+            unitWia[u] = (unitWia[u]||0) + (parseInt(b.wia)||0);
           });
         });
         const hitUnits = Object.keys(unitKia).filter(u=>unitKia[u]>0||unitWia[u]>0).sort((a,b)=>(unitKia[b]+unitWia[b])-(unitKia[a]+unitWia[a]));
@@ -4920,13 +5191,17 @@ function renderProvDistCounters(){
               </div>`).join('')
           : '<div class="counter-empty">No GSF casualties attributed to this group yet</div>';
 
-        // Which PGSF unit(s) get credit for neutralizing this group's insurgents —
-        // ins_entries store the acting unit in its own single-value "unit" field
+        // Which GSF unit(s) get credit for neutralizing this group's insurgents —
+        // only count the portion of each entry's breakdown that actually
+        // pertains to this group, since one operation can hit multiple groups
         const unitNeu = {}, unitInsWia = {};
         pdINS.forEach(r=>{
-          const u = normalizeUnitName(r.unit) || 'Unattributed';
-          unitNeu[u] = (unitNeu[u]||0) + (r.kia||0);
-          unitInsWia[u] = (unitInsWia[u]||0) + (r.wia||0);
+          (Array.isArray(r.breakdown) ? r.breakdown : []).forEach(b=>{
+            if(b.group !== group) return;
+            const u = normalizeUnitName(b.unit) || 'Unattributed';
+            unitNeu[u] = (unitNeu[u]||0) + (parseInt(b.kia)||0);
+            unitInsWia[u] = (unitInsWia[u]||0) + (parseInt(b.wia)||0);
+          });
         });
         const neuUnits = Object.keys(unitNeu).filter(u=>unitNeu[u]>0||unitInsWia[u]>0).sort((a,b)=>(unitNeu[b]+unitInsWia[b])-(unitNeu[a]+unitInsWia[a]));
         document.getElementById('counter-pd-breakdown-grid-2').innerHTML = neuUnits.length
@@ -4949,7 +5224,18 @@ function renderProvDistCounters(){
       // active, so picking a province first narrows this straight to its districts
       const buildDamageGeo = (field) => {
         const kiaBy = {}, civBy = {};
-        pdKIA.forEach(r=>{ const k=r[field]||'Unknown'; kiaBy[k]=(kiaBy[k]||0)+(r.kia||0); civBy[k]=(civBy[k]||0)+(r.civ_killed||0); });
+        pdKIA.forEach(r=>{
+          const k=r[field]||'Unknown';
+          const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+          if(group && breakdown.length){
+            // Only count this group's actual share of the incident, since a
+            // coordinated attack can involve more than one group
+            breakdown.forEach(b=>{ if(b.group===group) kiaBy[k]=(kiaBy[k]||0)+(parseInt(b.kia)||0); });
+          } else {
+            kiaBy[k]=(kiaBy[k]||0)+(r.kia||0);
+          }
+          civBy[k]=(civBy[k]||0)+(r.civ_killed||0);
+        });
         pdINS.forEach(r=>{ const k=r[field]||'Unknown'; civBy[k]=(civBy[k]||0)+(r.civ_killed||0); });
         pdCiv.forEach(r=>{ const k=r[field]||'Unknown'; civBy[k]=(civBy[k]||0)+(r.killed||0); });
         const keys = [...new Set([...Object.keys(kiaBy),...Object.keys(civBy)])].filter(k=>(kiaBy[k]||0)>0||(civBy[k]||0)>0);
@@ -4993,8 +5279,11 @@ function renderProvDistCounters(){
         const neuBy = {}, wiaBy = {};
         pdINS.forEach(r=>{
           const k = r[field]||'Unknown';
-          neuBy[k] = (neuBy[k]||0) + (r.kia||0);
-          wiaBy[k] = (wiaBy[k]||0) + (r.wia||0);
+          (Array.isArray(r.breakdown) ? r.breakdown : []).forEach(b=>{
+            if(normalizeUnitName(b.unit) !== unit) return;
+            neuBy[k] = (neuBy[k]||0) + (parseInt(b.kia)||0);
+            wiaBy[k] = (wiaBy[k]||0) + (parseInt(b.wia)||0);
+          });
         });
         const keys = Object.keys(neuBy).filter(k=>(neuBy[k]||0)>0||(wiaBy[k]||0)>0).sort((a,b)=>(neuBy[b]+ (wiaBy[b]||0))-(neuBy[a]+(wiaBy[a]||0)));
         return { neuBy, wiaBy, keys };
@@ -5006,14 +5295,23 @@ function renderProvDistCounters(){
         document.getElementById('counter-pd-unit-vs-groups').style.display = 'none';
       } else {
         document.getElementById('counter-pd-unit-vs-groups').style.display = 'block';
-        const groupNeuGeo = buildNeuGeo('group');
-        document.getElementById('counter-pd-breakdown-grid-7').innerHTML = groupNeuGeo.keys.length
-          ? groupNeuGeo.keys.map(k=>`
+        const neuByGrp = {}, wiaByGrp = {};
+        pdINS.forEach(r=>{
+          (Array.isArray(r.breakdown) ? r.breakdown : []).forEach(b=>{
+            if(normalizeUnitName(b.unit) !== unit) return;
+            const g = b.group || 'Unknown';
+            neuByGrp[g] = (neuByGrp[g]||0) + (parseInt(b.kia)||0);
+            wiaByGrp[g] = (wiaByGrp[g]||0) + (parseInt(b.wia)||0);
+          });
+        });
+        const grpKeys = Object.keys(neuByGrp).filter(k=>(neuByGrp[k]||0)>0||(wiaByGrp[k]||0)>0).sort((a,b)=>(neuByGrp[b]+(wiaByGrp[b]||0))-(neuByGrp[a]+(wiaByGrp[a]||0)));
+        document.getElementById('counter-pd-breakdown-grid-7').innerHTML = grpKeys.length
+          ? grpKeys.map(k=>`
               <div class="counter-card">
                 <div class="counter-card-name">${esc(k)}</div>
                 <div class="counter-card-nums">
-                  <span><span class="counter-card-num kia" style="color:#5c7a52">${groupNeuGeo.neuBy[k]}</span><span class="counter-card-num-label">Neutralized</span></span>
-                  <span><span class="counter-card-num wia">${groupNeuGeo.wiaBy[k]||0}</span><span class="counter-card-num-label">WIA</span></span>
+                  <span><span class="counter-card-num kia" style="color:#5c7a52">${neuByGrp[k]}</span><span class="counter-card-num-label">Neutralized</span></span>
+                  <span><span class="counter-card-num wia">${wiaByGrp[k]||0}</span><span class="counter-card-num-label">WIA</span></span>
                 </div>
               </div>`).join('')
           : `<div class="counter-empty">No groups neutralized by ${esc(unit)} recorded yet</div>`;
@@ -5053,10 +5351,10 @@ function renderProvDistCounters(){
 // Redraws the PGSF grid using the cached computed totals, filtered to the
 // dropdown's selected unit (or all units if none selected)
 function renderPGSFGrid(){
-  const { kia: kiaByType, wia: wiaByType, trueTotalKIA, trueTotalWIA } = _counterPGSF;
+  const { kia: kiaByType, wia: wiaByType, neu: neuByUnit, neuWia: neuWiaByUnit, trueTotalKIA, trueTotalWIA } = _counterPGSF;
   const selected = document.getElementById('counter-pgsf-filter').value;
   const pgsfGrid = document.getElementById('counter-pgsf-grid');
-  let branches = Object.keys(kiaByType).filter(t => t!=='Amaan Lashkar' && (kiaByType[t]>0 || wiaByType[t]>0));
+  let branches = Object.keys(kiaByType).filter(t => t!=='Amaan Lashkar' && (kiaByType[t]>0 || wiaByType[t]>0 || (neuByUnit[t]||0)>0 || (neuWiaByUnit[t]||0)>0));
   if(selected) branches = branches.filter(t => t===selected);
   document.getElementById('counter-pgsf-total-grid').innerHTML = `
     <div class="counter-card" style="background:var(--surface);border-color:var(--border-strong);">
@@ -5073,12 +5371,17 @@ function renderPGSFGrid(){
       .sort((a,b)=>(kiaByType[b]+wiaByType[b])-(kiaByType[a]+wiaByType[a]))
       .map(t => {
         const pct = trueTotalKIA>0 ? Math.round((kiaByType[t]/trueTotalKIA)*100) : 0;
+        const neu = neuByUnit[t]||0, neuWia = neuWiaByUnit[t]||0;
         return `
         <div class="counter-card">
           <div class="counter-card-name">${esc(t)}</div>
           <div class="counter-card-nums">
             <span><span class="counter-card-num kia">${kiaByType[t]}</span><span class="counter-card-num-label">KIA</span><span class="counter-card-pct">${pct}%</span></span>
             <span><span class="counter-card-num wia">${wiaByType[t]}</span><span class="counter-card-num-label">WIA</span></span>
+          </div>
+          <div class="counter-card-nums" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
+            <span><span class="counter-card-num" style="color:#5c7a52">${neu}</span><span class="counter-card-num-label">Neutralized</span></span>
+            <span><span class="counter-card-num" style="color:#5c7a52">${neuWia}</span><span class="counter-card-num-label">Ins. WIA</span></span>
           </div>
         </div>`;}).join('');
   }
@@ -5087,10 +5390,10 @@ function renderPGSFGrid(){
 // Redraws the insurgent-group grid using the cached computed totals, filtered
 // to the dropdown's selected group (or all groups if none selected)
 function renderGroupsGrid(){
-  const { neu: neuByGroup, wia: insWiaByGroup } = _counterGroups;
+  const { neu: neuByGroup, wia: insWiaByGroup, gsfKia: gsfKiaByGroup, gsfWia: gsfWiaByGroup } = _counterGroups;
   const selected = document.getElementById('counter-groups-filter').value;
   const groupsGrid = document.getElementById('counter-groups-grid');
-  let groups = Object.keys(neuByGroup).filter(g => neuByGroup[g]>0 || insWiaByGroup[g]>0);
+  let groups = Object.keys(neuByGroup).filter(g => neuByGroup[g]>0 || insWiaByGroup[g]>0 || (gsfKiaByGroup[g]||0)>0 || (gsfWiaByGroup[g]||0)>0);
   if(selected) groups = groups.filter(g => g===selected);
   const totalGroupNeu = Object.values(neuByGroup).reduce((s,v)=>s+v,0);
   const totalGroupWIA = Object.values(insWiaByGroup).reduce((s,v)=>s+v,0);
@@ -5109,12 +5412,17 @@ function renderGroupsGrid(){
       .sort((a,b)=>neuByGroup[b]-neuByGroup[a])
       .map(g => {
         const pct = totalGroupNeu>0 ? Math.round((neuByGroup[g]/totalGroupNeu)*100) : 0;
+        const gsfKia = gsfKiaByGroup[g]||0, gsfWia = gsfWiaByGroup[g]||0;
         return `
         <div class="counter-card">
           <div class="counter-card-name">${esc(g)}</div>
           <div class="counter-card-nums">
             <span><span class="counter-card-num kia">${neuByGroup[g]}</span><span class="counter-card-num-label">Neutralized</span><span class="counter-card-pct">${pct}%</span></span>
             <span><span class="counter-card-num wia">${insWiaByGroup[g]}</span><span class="counter-card-num-label">WIA</span></span>
+          </div>
+          <div class="counter-card-nums" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
+            <span><span class="counter-card-num" style="color:#a13d3d">${gsfKia}</span><span class="counter-card-num-label">GSF KIA</span></span>
+            <span><span class="counter-card-num" style="color:#a13d3d">${gsfWia}</span><span class="counter-card-num-label">GSF WIA</span></span>
           </div>
         </div>`;}).join('');
   }
@@ -5377,7 +5685,11 @@ function drawProvinces(noData, kia, ins){
 function drawGroups(noData, kia, ins){
   if(noData){emptyChart('an-groups');return;}
   const c={};
-  [...kia,...ins].forEach(r=>{if(r.group)c[r.group]=(c[r.group]||0)+1;});
+  kia.forEach(r=>{
+    if(r.group) c[r.group]=(c[r.group]||0)+1;
+    else (r.groups||[]).forEach(g=>{if(g)c[g]=(c[g]||0)+1;});
+  });
+  ins.forEach(r=>{(r.groups||[]).forEach(g=>{if(g)c[g]=(c[g]||0)+1;});});
   const s=Object.entries(c).sort((a,b)=>b[1]-a[1]);
   if(!s.length){emptyChart('an-groups');return;}
   drawDonut('an-groups',s.map(e=>e[0]),s.map(e=>e[1]),
@@ -5809,12 +6121,12 @@ function renderLiveFeed() {
     .sort((a,b) => (b.date||'').localeCompare(a.date||''))
     .slice(0, 20)
     .forEach(r => {
-      const isKIA = !r.unit;
+      const isKIA = r._recordType === 'kia';
       const loc = r.district && r.province ? `${r.district}, ${r.province}` : r.district || r.province || 'Unknown location';
       const event = r.event || 'incident';
       const eventLower = event.toLowerCase();
       const vowel = ['a','e','i','o','u'].includes(eventLower[0]) ? 'n' : '';
-      const grp = r.group || null;
+      const grp = r.group || (r.groups||[])[0] || null;
       const kia = r.kia || 0;
       const wia = r.wia || 0;
       const civKilled  = r.civ_killed  || 0;
@@ -5869,7 +6181,7 @@ function renderLiveFeed() {
         }
 
       } else {
-        const unit = r.unit||'security forces';
+        const unit = r.unit || (r.units||[]).join(' and ') || 'security forces';
         const civStr = civKilled>0?`, ${civKilled} civilian${civKilled>1?'s':''} killed`:'';
         const civSfx = civKilled>0||civWounded>0?` ${civKilled>0?civKilled+' civilian'+(civKilled>1?'s':'')+' also killed':''}${civKilled>0&&civWounded>0?', ':''}${civWounded>0?civWounded+' wounded':''}.`:'';
 
@@ -5909,7 +6221,7 @@ function renderLiveFeed() {
       const loc = r.district && r.province ? `${r.district}, ${r.province}` : r.district || r.province || 'Unknown location';
       const killed  = r.civ_killed  || 0;
       const wounded = r.civ_wounded || 0;
-      const grp = r.group || null;
+      const grp = r.group || (r.groups||[])[0] || null;
       const event = r.event || 'incident';
       const vowel = ['a','e','i','o','u'].includes(event[0].toLowerCase()) ? 'n' : '';
 
@@ -6128,7 +6440,7 @@ function buildDeepDataPackage() {
   [...allKIA,...allINS].forEach(r=>{
     const m = r.date?.slice(0,7); if(!m) return;
     if(!monthly[m]) monthly[m]={kia:0,wia:0,neu:0,ops:0};
-    if(!r.unit){ if(!(r.personnel||[]).includes('Amaan Lashkar')){ monthly[m].kia+=(r.kia||0); monthly[m].wia+=(r.wia||0); } }
+    if(r._recordType==='kia'){ if(!(r.personnel||[]).includes('Amaan Lashkar')){ monthly[m].kia+=(r.kia||0); monthly[m].wia+=(r.wia||0); } }
     else { monthly[m].neu+=(r.kia||0); monthly[m].ops++; }
   });
   const months = Object.keys(monthly).sort();
@@ -6138,26 +6450,48 @@ function buildDeepDataPackage() {
   [...allKIA,...allINS].forEach(r=>{
     if(!r.province) return;
     if(!byProvince[r.province]) byProvince[r.province]={kia:0,neu:0,incidents:0};
-    if(!r.unit){ if(!(r.personnel||[]).includes('Amaan Lashkar')) byProvince[r.province].kia+=(r.kia||0); }
+    if(r._recordType==='kia'){ if(!(r.personnel||[]).includes('Amaan Lashkar')) byProvince[r.province].kia+=(r.kia||0); }
     else byProvince[r.province].neu+=(r.kia||0);
     byProvince[r.province].incidents++;
   });
 
   // Group activity
   const byGroup = {};
-  [...allKIA,...allINS].forEach(r=>{
-    if(!r.group) return;
-    if(!byGroup[r.group]) byGroup[r.group]={attacks:0,kia_caused:0,neutralised:0};
-    if(!r.unit){ byGroup[r.group].attacks++; byGroup[r.group].kia_caused+=(r.kia||0); }
-    else byGroup[r.group].neutralised+=(r.kia||0);
+  allKIA.forEach(r=>{
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    if(breakdown.length){
+      breakdown.forEach(b=>{
+        const g = b.group || 'Unattributed';
+        if(!byGroup[g]) byGroup[g]={attacks:0,kia_caused:0,neutralised:0};
+        byGroup[g].kia_caused += (parseInt(b.kia)||0);
+      });
+      // Count the incident itself once per distinct group involved, not per breakdown row
+      [...new Set(breakdown.map(b=>b.group).filter(Boolean))].forEach(g=>{ if(byGroup[g]) byGroup[g].attacks++; });
+    } else if(r.group){
+      if(!byGroup[r.group]) byGroup[r.group]={attacks:0,kia_caused:0,neutralised:0};
+      byGroup[r.group].attacks++;
+      byGroup[r.group].kia_caused += (r.kia||0);
+    }
+  });
+  allINS.forEach(r=>{
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    breakdown.forEach(b=>{
+      const g = b.group || 'Unattributed';
+      if(!byGroup[g]) byGroup[g]={attacks:0,kia_caused:0,neutralised:0};
+      byGroup[g].neutralised += (parseInt(b.kia)||0);
+    });
   });
 
   // Personnel targets
   const byPersonnel = {};
-  allKIA.forEach(r=>(r.personnel||[]).forEach(p=>{
-    if(!byPersonnel[p]) byPersonnel[p]=0;
-    byPersonnel[p]+=(r.kia||0);
-  }));
+  allKIA.forEach(r=>{
+    const breakdown = Array.isArray(r.breakdown) ? r.breakdown : [];
+    breakdown.forEach(b=>{
+      const p = b.type || 'Unattributed';
+      if(!byPersonnel[p]) byPersonnel[p]=0;
+      byPersonnel[p] += (parseInt(b.kia)||0);
+    });
+  });
 
   // District hotspots
   const byDistrict = {};
@@ -6622,9 +6956,21 @@ function analyseBucket(entries) {
 
   const topProvinces = freq('province')(entries).slice(0,3);
   const topDistricts = freq('district')(entries).slice(0,3);
-  const topGroups = freq('group')(entries).slice(0,3);
   const topEvents = freq('event')(entries).slice(0,3);
-  const topUnits = freq('unit')(ins).slice(0,3);
+
+  // Groups: count each group an entry involves (a coordinated attack or
+  // operation can now involve more than one), not just a singular field
+  const groupCount = {};
+  entries.forEach(r=>{
+    const groups = r.group ? [r.group] : (r.groups||[]);
+    groups.forEach(g=>{ if(g) groupCount[g]=(groupCount[g]||0)+1; });
+  });
+  const topGroups = Object.entries(groupCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+  // Units: INS entries now carry an array of units, not a single value
+  const unitCount = {};
+  ins.forEach(r=>(r.units||[]).forEach(u=>{ if(u) unitCount[u]=(unitCount[u]||0)+1; }));
+  const topUnits = Object.entries(unitCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
 
   const personnelCount = {};
   kia.forEach(r=>(r.personnel||[]).forEach(p=>{personnelCount[p]=(personnelCount[p]||0)+1;}));
@@ -6828,7 +7174,7 @@ function exportData(){
     r.date||'', r.province||'', r.district||'', r.event||'',
     r.kia??0, r.wia??0,
     (r.personnel||[]).join(', '),
-    r.group||'', r.civ_killed??0, r.civ_wounded??0, r.details||''
+    r.group||(r.groups||[]).join(', ')||'', r.civ_killed??0, r.civ_wounded??0, r.details||''
   ]);
 
   // Sheet 2: Insurgents Neutralized
@@ -6836,7 +7182,7 @@ function exportData(){
   const insRows = insData.map(r=>[
     r.date||'', r.province||'', r.district||'', r.event||'',
     r.kia??0, r.wia??0,
-    r.unit||'', r.group||'', r.civ_killed??0, r.civ_wounded??0, r.details||''
+    (r.units||[]).join(', '), (r.groups||[]).join(', '), r.civ_killed??0, r.civ_wounded??0, r.details||''
   ]);
 
   const wb = XLSX.utils.book_new();
@@ -6878,21 +7224,25 @@ async function importData(event){
           const dateStr = dateVal instanceof Date
             ? dateVal.toISOString().slice(0,10)
             : String(dateVal||'').slice(0,10);
+          const kiaVal = parseInt(r['KIA'])||0;
+          const wiaVal = parseInt(r['WIA'])||0;
+          const personnelList = r['Personnel'] ? String(r['Personnel']).split(',').map(s=>s.trim()).filter(Boolean) : [];
           const entry = {
             date: dateStr,
             province: r['Province']||'',
             district: r['District']||'',
             event: r['Event']||'',
-            kia: parseInt(r['KIA'])||0,
-            wia: parseInt(r['WIA'])||0,
-            personnel: r['Personnel'] ? String(r['Personnel']).split(',').map(s=>s.trim()).filter(Boolean) : [],
+            // Spreadsheet rows only have one combined total, not a real per-unit
+            // split, so the imported row becomes a single breakdown entry
+            breakdown: personnelList.length ? [{type: personnelList.join(', '), kia: kiaVal, wia: wiaVal}] : [],
             group: r['Insurgent Group']||'',
             civ_killed: parseInt(r['Civ Killed'])||0,
             civ_wounded: parseInt(r['Civ Wounded'])||0,
             details: r['Details']||''
           };
           if(entry.date || entry.district){
-            kiaData.push(entry);
+            const derived = deriveKiaAggregates({...entry});
+            kiaData.push(derived);
             newKiaRows.push(entry);
             imported.kia++;
           }
@@ -6913,21 +7263,25 @@ async function importData(event){
           const dateStr = dateVal instanceof Date
             ? dateVal.toISOString().slice(0,10)
             : String(dateVal||'').slice(0,10);
+          const kiaVal = parseInt(r['KIA'])||0;
+          const wiaVal = parseInt(r['WIA'])||0;
+          const unitVal = r['CI Unit']||'';
+          const groupVal = r['Insurgent Group']||'';
           const entry = {
             date: dateStr,
             province: r['Province']||'',
             district: r['District']||'',
             event: r['Event']||'',
-            kia: parseInt(r['KIA'])||0,
-            wia: parseInt(r['WIA'])||0,
-            unit: r['CI Unit']||'',
-            group: r['Insurgent Group']||'',
+            // Same limitation as above — one combined total per row, so it
+            // becomes a single breakdown entry rather than a real split
+            breakdown: (unitVal || groupVal) ? [{unit: unitVal, group: groupVal, kia: kiaVal, wia: wiaVal}] : [],
             civ_killed: parseInt(r['Civ Killed'])||0,
             civ_wounded: parseInt(r['Civ Wounded'])||0,
             details: r['Details']||''
           };
           if(entry.date || entry.district){
-            insData.push(entry);
+            const derived = deriveInsAggregates({...entry});
+            insData.push(derived);
             newInsRows.push(entry);
             imported.ins++;
           }
