@@ -127,6 +127,7 @@ body.dark .map-mode-btn { background: rgba(26,29,39,0.9); border-color: #2e2e2e;
 body.dark .badge-province { background: #1c1c1c; color: #8a9aa8; }
 body.dark .badge-group { background: #241f16; color: #b89a5f; }
 body.dark .badge-unit { background: #16211a; color: #6b9b74; }
+body.dark .badge-civ { background: #241c14; color: #b3854f; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: var(--font); background: var(--bg); color: var(--text-primary); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 ::selection { background: var(--accent); color: white; }
@@ -633,6 +634,11 @@ td.td-action { width: 64px; text-align: right; padding: 6px 10px; white-space: n
 .breakdown-add-btn { margin-top: 8px; }
 .load-more-row { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 16px; border-top: 1px solid var(--border); background: var(--surface); }
 .load-more-row .load-more-count { font-family: var(--mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.03em; }
+.log-breakdown { display: flex; flex-direction: column; gap: 5px; }
+.log-breakdown-row { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.log-breakdown-arrow { color: var(--text-muted); font-size: 11px; }
+.log-breakdown-nums { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-primary); margin-left: 2px; }
+.log-breakdown-nums-sep { color: var(--text-muted); font-weight: 500; margin: 0 1px; }
 
 /* LAYOUT */
 .page { padding: 24px 28px; max-width: 1400px; }
@@ -659,14 +665,16 @@ td.td-action { width: 64px; text-align: right; padding: 6px 10px; white-space: n
 
 /* COUNTER TAB */
 .counter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; padding: 4px 4px 0; }
-.counter-card { background: var(--surface2); border: 1px solid var(--border); padding: 12px 14px; transition: border-color 0.15s, transform 0.15s; }
+.counter-card { background: var(--surface2); border: 1px solid var(--border); overflow: hidden; transition: border-color 0.15s, transform 0.15s; }
 .counter-card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
-.counter-card-name { font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.03em; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.counter-card-nums { display: flex; gap: 14px; align-items: baseline; }
-.counter-card-num { font-family: var(--mono); font-weight: 700; font-size: 20px; }
+.counter-card-name { font-size: 13px; font-weight: 600; color: var(--text-primary); letter-spacing: 0.01em; padding: 11px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.counter-card-nums { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; padding: 12px 14px; background: rgba(161,61,61,0.04); }
+.counter-card-nums + .counter-card-nums { border-top: 1px solid var(--border); background: rgba(92,122,82,0.05); }
+.counter-card-metric { display: flex; flex-direction: column; gap: 4px; }
+.counter-card-num { font-family: var(--mono); font-weight: 700; font-size: 24px; line-height: 1; }
 .counter-card-num.kia { color: #a13d3d; }
 .counter-card-num.wia { color: var(--text-primary); }
-.counter-card-num-label { font-size: 9px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; margin-left: 3px; }
+.counter-card-num-label { font-size: 9px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; font-family: var(--mono); white-space: nowrap; }
 .counter-empty { grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-size: 12px; padding: 24px 0; }
 .counter-empty::before { content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='26' height='26' fill='none' stroke='%238a8f98' stroke-width='1.5'%3E%3Crect x='3' y='7' width='18' height='13' rx='2'/%3E%3Cpath d='M3 12h5l1.5 2h5L16 12h5'/%3E%3C/svg%3E"); display: block; margin: 0 auto 8px; opacity: 0.45; }
 .confidence-badge { display: inline-block; padding: 2px 8px; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--mono); background: transparent; border: 1px solid currentColor; }
@@ -697,6 +705,9 @@ td.td-action { width: 64px; text-align: right; padding: 6px 10px; white-space: n
 .counter-subtab.provdist { border-color: #3f5f5a; color: #3f5f5a; }
 .counter-subtab.provdist:hover { background: rgba(15,118,110,0.1); border-color: #3f5f5a; color: #3f5f5a; }
 .counter-subtab.provdist.active { background: #3f5f5a; color: white; border-color: #3f5f5a; }
+.counter-subtab.unitgroup { border-color: #3a5578; color: #3a5578; }
+.counter-subtab.unitgroup:hover { background: rgba(58,85,120,0.1); border-color: #3a5578; color: #3a5578; }
+.counter-subtab.unitgroup.active { background: #3a5578; color: white; border-color: #3a5578; }
 
 /* TOOLBAR */
 .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
@@ -746,6 +757,7 @@ tbody tr:hover td { background: var(--border); }
 .td-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
 .badge-group { background: #fef9ec; color: #7a4f00; }
 .badge-unit { background: var(--success-light); color: var(--success); }
+.badge-civ { background: #fdf0e0; color: #8a6a3f; }
 .empty-row td { text-align: center; padding: 48px; color: var(--text-muted); font-size: 13px; border-bottom: none; }
 .empty-row td::before { content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='30' height='30' fill='none' stroke='%238a8f98' stroke-width='1.5'%3E%3Crect x='3' y='7' width='18' height='13' rx='2'/%3E%3Cpath d='M3 12h5l1.5 2h5L16 12h5'/%3E%3C/svg%3E"); display: block; margin: 0 auto 10px; opacity: 0.45; }
 .btn-delete { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: none; border: 1px solid transparent; cursor: pointer; color: var(--text-muted); transition: all 0.15s; }
@@ -1652,12 +1664,11 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <th onclick="sortTable('kia','event')" id="kia-th-event">Event</th>
           <th onclick="sortTable('kia','kia')" id="kia-th-kia" style="text-align:right">KIA</th>
           <th onclick="sortTable('kia','wia')" id="kia-th-wia" style="text-align:right">WIA</th>
-          <th>Personnel</th>
-          <th onclick="sortTable('kia','group')" id="kia-th-group">Group</th>
+          <th>Breakdown</th>
           <th>Confidence</th>
           <th>Details</th>
         </tr></thead>
-        <tbody id="kia-tbody"><tr class="empty-row"><td colspan="10">No records match the current filters.</td></tr></tbody>
+        <tbody id="kia-tbody"><tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr></tbody>
       </table>
     </div>
   <div class="load-more-row" id="kia-load-more" style="display:none;">
@@ -1712,11 +1723,11 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <th onclick="sortTable('lashkar','event')" id="lashkar-th-event">Event</th>
           <th onclick="sortTable('lashkar','kia')" id="lashkar-th-kia" style="text-align:right">KIA / Neu.</th>
           <th onclick="sortTable('lashkar','wia')" id="lashkar-th-wia" style="text-align:right">WIA</th>
-          <th onclick="sortTable('lashkar','group')" id="lashkar-th-group">Group</th>
+          <th>Breakdown</th>
           <th>Confidence</th>
           <th>Details</th>
         </tr></thead>
-        <tbody id="lashkar-tbody"><tr class="empty-row"><td colspan="10">No records match the current filters.</td></tr></tbody>
+        <tbody id="lashkar-tbody"><tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1765,12 +1776,11 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <th onclick="sortTable('ins','event')" id="ins-th-event">Event</th>
           <th onclick="sortTable('ins','kia')" id="ins-th-kia" style="text-align:right">KIA</th>
           <th onclick="sortTable('ins','wia')" id="ins-th-wia" style="text-align:right">WIA</th>
-          <th onclick="sortTable('ins','unit')" id="ins-th-unit">CI Unit</th>
-          <th onclick="sortTable('ins','group')" id="ins-th-group">Group</th>
+          <th>Breakdown</th>
           <th>Confidence</th>
           <th>Details</th>
         </tr></thead>
-        <tbody id="ins-tbody"><tr class="empty-row"><td colspan="10">No records match the current filters.</td></tr></tbody>
+        <tbody id="ins-tbody"><tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr></tbody>
       </table>
     </div>
   <div class="load-more-row" id="ins-load-more" style="display:none;">
@@ -1952,10 +1962,10 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <th>Event</th>
           <th style="text-align:right">Killed</th>
           <th style="text-align:right">Wounded</th>
-          <th>Group</th>
+          <th>Breakdown</th>
           <th>Details</th>
         </tr></thead>
-        <tbody id="civ-tbody"><tr class="empty-row"><td colspan="8">No civilian casualty records yet.</td></tr></tbody>
+        <tbody id="civ-tbody"><tr class="empty-row"><td colspan="7">No civilian casualty records yet.</td></tr></tbody>
       </table>
     </div>
 
@@ -2080,16 +2090,17 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
 
     <!-- Sub-tab selector -->
     <div class="counter-subtabs" id="counter-subtabs" style="margin-top:16px;">
-      <button class="counter-subtab active" data-sub="pgsf" onclick="showCounterSub('pgsf',this)">Government Security Forces</button>
+      <button class="counter-subtab provdist active" data-sub="provdist" onclick="showCounterSub('provdist',this)">Provinces &amp; Districts</button>
+      <button class="counter-subtab unitgroup" data-sub="unitgroup" onclick="showCounterSub('unitgroup',this)">Unit vs Group</button>
+      <button class="counter-subtab" data-sub="pgsf" onclick="showCounterSub('pgsf',this)">Government Security Forces</button>
       <button class="counter-subtab" data-sub="insurgents" onclick="showCounterSub('insurgents',this)">Insurgents</button>
       <button class="counter-subtab" data-sub="civilians" onclick="showCounterSub('civilians',this)">Civilians</button>
       <button class="counter-subtab" data-sub="lashkar" onclick="showCounterSub('lashkar',this)">Amaan Lashkar</button>
-      <button class="counter-subtab provdist" data-sub="provdist" onclick="showCounterSub('provdist',this)">Provinces &amp; Districts</button>
       <button class="counter-subtab" data-sub="compare" onclick="showCounterSub('compare',this)">Compare Periods</button>
     </div>
 
     <!-- Security forces by branch -->
-    <div class="an-card counter-sub-panel" id="counter-sub-pgsf" style="margin-bottom:16px;">
+    <div class="an-card counter-sub-panel" id="counter-sub-pgsf" style="margin-bottom:16px;display:none;">
       <div class="an-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div>
           <div class="an-card-title">Government Security Forces — by branch</div>
@@ -2145,7 +2156,7 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
     </div>
 
     <!-- Provinces & Districts -->
-    <div class="an-card counter-sub-panel" id="counter-sub-provdist" style="display:none;border-left:3px solid #3f5f5a;">
+    <div class="an-card counter-sub-panel" id="counter-sub-provdist" style="border-left:3px solid #3f5f5a;">
       <div class="an-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div>
           <div class="an-card-title">Provinces &amp; Districts</div>
@@ -2195,6 +2206,43 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <div class="counter-grid" id="counter-pd-breakdown-grid-5"></div>
           <div class="an-card-sub" style="margin:16px 0 8px;">Districts this unit has neutralized insurgents in</div>
           <div class="counter-grid" id="counter-pd-breakdown-grid-6"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unit vs Group -->
+    <div class="an-card counter-sub-panel" id="counter-sub-unitgroup" style="display:none;border-left:3px solid #3a5578;">
+      <div class="an-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div class="an-card-title">Unit vs Group</div>
+          <div class="an-card-sub">Pick a unit and/or a group to see exactly who has fought whom, regardless of where</div>
+        </div>
+        <div class="counter-filter-row" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select class="filter-select" id="counter-uvg-unit" onchange="renderUnitVsGroup()"><option value="">All units</option></select>
+          <select class="filter-select" id="counter-uvg-group" onchange="renderUnitVsGroup()"><option value="">All groups</option></select>
+        </div>
+      </div>
+      <div id="counter-uvg-empty" class="counter-empty" style="display:none;"></div>
+      <div id="counter-uvg-default">
+        <div class="an-card-sub" style="margin:12px 0 8px;">Every unit — total KIA/WIA taken and Neutralized/WIA credited</div>
+        <div class="counter-grid" id="counter-uvg-default-units"></div>
+        <div class="an-card-sub" style="margin:16px 0 8px;">Every group — total Neutralized/WIA taken and GSF KIA/WIA inflicted</div>
+        <div class="counter-grid" id="counter-uvg-default-groups"></div>
+      </div>
+      <div id="counter-uvg-pair" style="display:none;">
+        <div class="an-card-sub" style="margin:12px 0 8px;" id="counter-uvg-pair-heading"></div>
+        <div class="counter-grid" id="counter-uvg-pair-grid"></div>
+      </div>
+      <div id="counter-uvg-content" style="display:none;">
+        <div id="counter-uvg-unit-breakdowns">
+          <div class="an-card-sub" style="margin:12px 0 8px;">Head to Head — units this group has killed/wounded</div>
+          <div class="counter-grid" id="counter-uvg-grid-1"></div>
+          <div class="an-card-sub" style="margin:16px 0 8px;">Head to Head — units that neutralized this group</div>
+          <div class="counter-grid" id="counter-uvg-grid-2"></div>
+        </div>
+        <div id="counter-uvg-group-breakdowns">
+          <div class="an-card-sub" style="margin:16px 0 8px;">Head to Head — groups this unit has neutralized</div>
+          <div class="counter-grid" id="counter-uvg-grid-3"></div>
         </div>
       </div>
     </div>
@@ -2367,14 +2415,12 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
           <th onclick="sortLog('event')" id="log-th-event">Event</th>
           <th onclick="sortLog('kia')" id="log-th-kia" style="text-align:right">KIA</th>
           <th onclick="sortLog('wia')" id="log-th-wia" style="text-align:right">WIA</th>
-          <th>Personnel</th>
-          <th onclick="sortLog('group')" id="log-th-group">Group</th>
-          <th onclick="sortLog('unit')" id="log-th-unit">Unit</th>
+          <th>Breakdown</th>
           <th>Confidence</th>
           <th>Details</th>
           <th id="log-th-actions">Actions</th>
         </tr></thead>
-        <tbody id="log-tbody"><tr class="empty-row"><td colspan="13">No records match the current filters.</td></tr></tbody>
+        <tbody id="log-tbody"><tr class="empty-row"><td colspan="11">No records match the current filters.</td></tr></tbody>
       </table>
     </div>
   <div class="load-more-row" id="log-load-more" style="display:none;">
@@ -2711,6 +2757,57 @@ const SUPABASE_KEY = 'sb_publishable_hywtK6f1fP2p83rs3hN50g_FLnxrYZj';
 // visitor who loads the page (stored XSS). Wrap every such value in esc(...).
 // Renders a small colored badge for an entry's confidence level. Legacy
 // entries with no confidence field set default to "Confirmed" for display.
+// Renders the per-unit/per-group breakdown for one entry, used identically
+// across Incidents, Insurgents Neutralized, Amaan Lashkar, Civilians, and
+// Data Log. recordType is 'kia' or 'ins' and controls the wording (KIA vs
+// Neutralized) so it's never ambiguous which table you're looking at.
+// WIA is only shown when it's actually greater than zero.
+function renderBreakdownCell(breakdown, recordType) {
+  if(!Array.isArray(breakdown) || !breakdown.length) return '—';
+  const verb = recordType === 'kia' ? 'KIA' : 'Neutralized';
+  return `<div class="log-breakdown">${breakdown.map(b=>{
+    const who = recordType==='kia' ? (b.type||'Unattributed') : (b.unit||'Unattributed');
+    const grp = b.group||'';
+    const n1 = b.kia||0, n2 = b.wia||0;
+    let numsText = `${n1} ${verb}`;
+    if(n2>0) numsText += ` · ${n2} WIA`;
+    // Arrow always points from aggressor to target: for Incidents the group
+    // attacked the unit (group first), for Neutralized the unit conducted
+    // the operation against the group (unit first)
+    const unitTag = `<span class="badge badge-unit">${esc(who)}</span>`;
+    const groupTag = grp ? `<span class="badge badge-group">${esc(grp)}</span>` : '';
+    const arrow = grp ? `<span class="log-breakdown-arrow">→</span>` : '';
+    const pairHtml = recordType === 'kia'
+      ? `${groupTag}${arrow}${unitTag}`
+      : `${unitTag}${arrow}${groupTag}`;
+    return `<div class="log-breakdown-row">
+      ${pairHtml}
+      <span class="log-breakdown-nums">${numsText}</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// Civilian casualties aren't split per-unit/per-group like KIA/WIA are — it's
+// one total for the whole incident — so this shows who was actually involved
+// (the group, if it's an Incident; the unit, if it's an operation) paired
+// with "Civilian", rather than the unrelated GSF-vs-insurgent breakdown.
+function renderCivBreakdownCell(row) {
+  const killed = row.killed||0, wounded = row.wounded||0;
+  const responsible = row._source === 'kia' ? row.groups : row.units;
+  if(!responsible || !responsible.length) return '—';
+  let numsText = `${killed} Killed`;
+  if(wounded>0) numsText += ` · ${wounded} Wounded`;
+  return `<div class="log-breakdown">${responsible.map(who=>{
+    const tag = row._source === 'kia'
+      ? `<span class="badge badge-group">${esc(who)}</span>`
+      : `<span class="badge badge-unit">${esc(who)}</span>`;
+    return `<div class="log-breakdown-row">
+      ${tag}<span class="log-breakdown-arrow">→</span><span class="badge badge-civ">Civilian</span>
+      <span class="log-breakdown-nums">${numsText}</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+
 function confidenceBadge(level) {
   const lvl = level || 'Confirmed';
   return `<span class="confidence-badge ${lvl.toLowerCase()}">${esc(lvl)}</span>`;
@@ -3247,12 +3344,17 @@ function getCivRows() {
     const killed  = r.civ_killed  || 0;
     const wounded = r.civ_wounded || 0;
     if(killed > 0 || wounded > 0) {
+      const groups = r.group ? [r.group] : (r.groups||[]);
+      const units = r.units || [];
       rows.push({
         date:     r.date     || '',
         province: r.province || '',
         district: r.district || '',
         event:    r.event    || '',
-        group:    r.group || (r.groups||[]).join(', ') || '',
+        groups,                          // real array, for correct filtering
+        groupDisplay: groups.join(', '), // joined string, for display only — never used as a filter/count key
+        units,
+        breakdown: Array.isArray(r.breakdown) ? r.breakdown : [],
         killed,
         wounded,
         details:  r.details  || '',
@@ -3266,7 +3368,7 @@ function getCivRows() {
 function populateCivFilters() {
   const rows = getCivRows();
   const provs = [...new Set(rows.map(r=>r.province).filter(Boolean))].sort();
-  const grps  = [...new Set(rows.map(r=>r.group).filter(Boolean))].sort();
+  const grps  = [...new Set(rows.flatMap(r=>r.groups).filter(Boolean))].sort();
   const pSel = document.getElementById('civ-filter-province');
   const gSel = document.getElementById('civ-filter-group');
   if(pSel) { pSel.innerHTML = '<option value="">All Provinces</option>' + provs.map(p=>`<option>${p}</option>`).join(''); }
@@ -3281,7 +3383,7 @@ function renderCiv() {
   const all = getCivRows();
   const filtered = all.filter(r =>
     (!prov || r.province === prov) &&
-    (!grp  || r.group === grp) &&
+    (!grp  || r.groups.includes(grp)) &&
     (!q    || (r.district||'').toLowerCase().includes(q) ||
               (r.event||'').toLowerCase().includes(q) ||
               (r.details||'').toLowerCase().includes(q))
@@ -3303,7 +3405,7 @@ function renderCiv() {
   const tbody = document.getElementById('civ-tbody');
   if(!tbody) return;
   if(!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:40px;">No civilian casualties recorded yet — add Civilians Killed/Wounded when logging incidents.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">No civilian casualties recorded yet — add Civilians Killed/Wounded when logging incidents.</td></tr>`;
     return;
   }
   tbody.innerHTML = filtered.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(r => `<tr>
@@ -3313,7 +3415,7 @@ function renderCiv() {
     <td>${esc(r.event)||'—'}</td>
     <td class="td-num" style="color:#8a6a3f">${r.killed||0}</td>
     <td class="td-num" style="color:#9c7a45">${r.wounded||0}</td>
-    <td>${r.group?`<span class="badge badge-group">${esc(r.group)}</span>`:'—'}</td>
+    <td>${renderCivBreakdownCell(r)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
   </tr>`).join('');
 }
@@ -3852,9 +3954,6 @@ function renderKIA(isLoadMore){
   if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr>';if(loadMoreEl)loadMoreEl.style.display='none';return;}
   const visibleRows = rows.slice(0, kiaPageSize);
   tbody.innerHTML=visibleRows.map(r=>{
-    const groupDisplay = r.group
-      ? `<span class="badge badge-group">${esc(r.group)}</span>`
-      : ((r.groups||[]).length ? r.groups.map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' ') : '—');
     return `<tr>
     <td class="td-date">${esc(r.date)||'—'}</td>
     <td><span class="badge badge-province">${esc(r.province)||'—'}</span></td>
@@ -3862,8 +3961,7 @@ function renderKIA(isLoadMore){
     <td>${esc(r.event)||'—'}</td>
     <td class="td-num ${r.kia?'danger':'muted'}">${r.kia??0}</td>
     <td class="td-num ${r.wia?'warning':'muted'}">${r.wia??0}</td>
-    <td>${r.personnel&&r.personnel.length?`<div class="personnel-tags">${r.personnel.map(p=>`<span class="personnel-tag">${esc(p)}</span>`).join('')}</div>`:'—'}</td>
-    <td>${groupDisplay}</td>
+    <td>${renderBreakdownCell(r.breakdown, 'kia')}</td>
     <td>${confidenceBadge(r.confidence)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
   </tr>`;
@@ -3921,11 +4019,8 @@ function renderLashkar(){
     <div class="stat-card"><div class="stat-label">Districts</div><div class="stat-value">${distCount}</div></div>`;
   document.getElementById('lashkar-count').textContent=rows.length+' record'+(rows.length!==1?'s':'');
   const tbody=document.getElementById('lashkar-tbody');
-  if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="10">No records match the current filters.</td></tr>';return;}
+  if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="9">No records match the current filters.</td></tr>';return;}
   tbody.innerHTML=rows.map(r=>{
-    const groupDisplay = r._type==='kia'
-      ? (r.group?`<span class="badge badge-group">${esc(r.group)}</span>`:'—')
-      : ((r.groups||[]).length ? r.groups.map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' ') : '—');
     return `<tr>
     <td class="td-date">${esc(r.date)||'—'}</td>
     <td><span class="badge ${r._type==='kia'?'badge-type-kia':'badge-type-ins'}">${r._type==='kia'?'Incident':'Neutralization'}</span></td>
@@ -3934,7 +4029,7 @@ function renderLashkar(){
     <td>${esc(r.event)||'—'}</td>
     <td class="td-num ${r.kia?(r._type==='kia'?'danger':'success'):'muted'}">${r.kia??0}</td>
     <td class="td-num ${r.wia?'warning':'muted'}">${r.wia??0}</td>
-    <td>${groupDisplay}</td>
+    <td>${renderBreakdownCell(r.breakdown, r._type)}</td>
     <td>${confidenceBadge(r.confidence)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
   </tr>`;
@@ -3981,8 +4076,7 @@ function renderINS(isLoadMore){
     <td>${esc(r.event)||'—'}</td>
     <td class="td-num ${r.kia?'danger':'muted'}">${r.kia??0}</td>
     <td class="td-num ${r.wia?'warning':'muted'}">${r.wia??0}</td>
-    <td>${(r.units||[]).length?(r.units||[]).map(u=>`<span class="badge badge-unit">${esc(u)}</span>`).join(' '):'—'}</td>
-    <td>${(r.groups||[]).length?(r.groups||[]).map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' '):'—'}</td>
+    <td>${renderBreakdownCell(r.breakdown, 'ins')}</td>
     <td>${confidenceBadge(r.confidence)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
   </tr>`).join('');
@@ -4377,19 +4471,13 @@ function renderLog(isLoadMore){
   const tbody = document.getElementById('log-tbody');
   const loadMoreEl = document.getElementById('log-load-more');
   if(!all.length){
-    tbody.innerHTML=`<tr class="empty-row"><td colspan="${logAdmin?'12':'11'}">No records match the current filters.</td></tr>`;
+    tbody.innerHTML=`<tr class="empty-row"><td colspan="${logAdmin?'11':'10'}">No records match the current filters.</td></tr>`;
     if(loadMoreEl) loadMoreEl.style.display='none';
     return;
   }
 
   const visibleRows = all.slice(0, logPageSize);
   tbody.innerHTML = visibleRows.map(r=>{
-    const groupDisplay = r.group
-      ? `<span class="badge badge-group">${esc(r.group)}</span>`
-      : ((r.groups||[]).length ? r.groups.map(g=>`<span class="badge badge-group">${esc(g)}</span>`).join(' ') : '—');
-    const unitDisplay = (r.units||[]).length
-      ? r.units.map(u=>`<span class="badge badge-unit">${esc(u)}</span>`).join(' ')
-      : '—';
     return `<tr>
     <td class="td-date">${esc(r.date)||'—'}</td>
     <td><span class="badge ${r._type==='kia'?'badge-type-kia':'badge-type-ins'}">${r._type==='kia'?'Incidents':'Insurgents Neu.'}</span></td>
@@ -4398,9 +4486,7 @@ function renderLog(isLoadMore){
     <td>${esc(r.event)||'—'}</td>
     <td class="td-num ${r.kia?'danger':'muted'}">${r.kia??0}</td>
     <td class="td-num ${r.wia?'warning':'muted'}">${r.wia??0}</td>
-    <td>${r.personnel&&r.personnel.length?`<div class="personnel-tags">${r.personnel.map(p=>`<span class="personnel-tag">${esc(p)}</span>`).join('')}</div>`:'—'}</td>
-    <td>${groupDisplay}</td>
-    <td>${unitDisplay}</td>
+    <td>${renderBreakdownCell(r.breakdown, r._type)}</td>
     <td>${confidenceBadge(r.confidence)}</td>
     <td class="td-details">${esc(r.details)||'—'}</td>
     ${logAdmin ? `<td class="td-action">
@@ -4439,16 +4525,17 @@ function renderAnalytics(){
   // PGSF headline figures exclude Amaan Lashkar (tracked separately site-wide);
   // the personnel-breakdown chart below still includes it as its own bar
   const pgsfOnlyKIA = allKIA.filter(r=>!(r.personnel||[]).includes('Amaan Lashkar'));
+  const pgsfOnlyINS = allINS.filter(r=>!insHasUnit(r,'Amaan Lashkar'));
   const totalKIA=pgsfOnlyKIA.reduce((s,r)=>s+(r.kia||0),0);
   const totalWIA=pgsfOnlyKIA.reduce((s,r)=>s+(r.wia||0),0);
-  const totalNeu=allINS.reduce((s,r)=>s+(r.kia||0),0);
+  const totalNeu=pgsfOnlyINS.reduce((s,r)=>s+(r.kia||0),0);
   const totalCivKilled  = [...kiaData,...insData].filter(r=>inDateRange(r.date||'',range)).reduce((s,r)=>s+(r.civ_killed||0),0);
   const totalCivWounded = [...kiaData,...insData].filter(r=>inDateRange(r.date||'',range)).reduce((s,r)=>s+(r.civ_wounded||0),0);
   document.getElementById('an-kpis').innerHTML=`
     <div class="stat-card"><div class="stat-label">GSF KIA</div><div class="stat-value danger">${totalKIA}</div></div>
     <div class="stat-card"><div class="stat-label">GSF WIA</div><div class="stat-value">${totalWIA}</div></div>
     <div class="stat-card"><div class="stat-label">Insurgents Neutralized</div><div class="stat-value success">${totalNeu}</div></div>
-    <div class="stat-card"><div class="stat-label">Total Incidents</div><div class="stat-value teal">${allKIA.length+allINS.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Incidents</div><div class="stat-value teal">${pgsfOnlyKIA.length+pgsfOnlyINS.length}</div></div>
     <div class="stat-card"><div class="stat-label">Civilians Killed</div><div class="stat-value" style="color:#8a6a3f">${totalCivKilled}</div></div>
     <div class="stat-card"><div class="stat-label">Civilians Wounded</div><div class="stat-value" style="color:#9c7a45">${totalCivWounded}</div></div>`;
   const noData = allKIA.length+allINS.length===0;
@@ -4529,12 +4616,13 @@ function renderCounter(){
   const isLashkarEntry = r => (r.personnel||[]).includes('Amaan Lashkar');
   const pgsfOnlyKIA = allKIA.filter(r=>!isLashkarEntry(r));
   const lashkarOnlyKIA = allKIA.filter(isLashkarEntry);
+  const pgsfOnlyINS = allINS.filter(r=>!insHasUnit(r,'Amaan Lashkar'));
   const totalKIA = pgsfOnlyKIA.reduce((s,r)=>s+(r.kia||0),0);
   const totalWIA = pgsfOnlyKIA.reduce((s,r)=>s+(r.wia||0),0);
   const totalLashkarKIA = lashkarOnlyKIA.reduce((s,r)=>s+(r.kia||0),0);
   const totalLashkarWIA = lashkarOnlyKIA.reduce((s,r)=>s+(r.wia||0),0);
-  const totalNeu = allINS.reduce((s,r)=>s+(r.kia||0),0);
-  const totalInsWIA = allINS.reduce((s,r)=>s+(r.wia||0),0);
+  const totalNeu = pgsfOnlyINS.reduce((s,r)=>s+(r.kia||0),0);
+  const totalInsWIA = pgsfOnlyINS.reduce((s,r)=>s+(r.wia||0),0);
 
   // Civilians: standalone civilian_casualties entries + civilian counts logged
   // alongside a KIA/INS incident
@@ -4549,7 +4637,7 @@ function renderCounter(){
   let prevKIA=null, prevNeu=null, prevCivKilled=null;
   if(prevRange){
     const prevKIAData = kiaData.filter(r=>inDateRange(r.date||'',prevRange) && !isLashkarEntry(r));
-    const prevINSData = insData.filter(r=>inDateRange(r.date||'',prevRange));
+    const prevINSData = insData.filter(r=>inDateRange(r.date||'',prevRange) && !insHasUnit(r,'Amaan Lashkar'));
     const prevCivData = civData.filter(r=>inDateRange(r.date||'',prevRange));
     prevKIA = prevKIAData.reduce((s,r)=>s+(r.kia||0),0);
     prevNeu = prevINSData.reduce((s,r)=>s+(r.kia||0),0);
@@ -4587,7 +4675,7 @@ function renderCounter(){
     <div class="stat-card"><div class="stat-label">Insurgents Wounded</div><div class="stat-value">${totalInsWIA}</div></div>
     <div class="stat-card"><div class="stat-label">Civilians Killed</div><div class="stat-value amber">${totalCivKilled}</div>${trendBadge(totalCivKilled,prevCivKilled,'down')}</div>
     <div class="stat-card"><div class="stat-label">Civilians Wounded</div><div class="stat-value" style="color:#9c7a45">${totalCivWounded}</div></div>
-    <div class="stat-card"><div class="stat-label">Total Incidents</div><div class="stat-value teal">${allKIA.length+allINS.length+allCiv.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Incidents</div><div class="stat-value teal">${pgsfOnlyKIA.length+pgsfOnlyINS.length+allCiv.length}</div></div>
     <div class="stat-card"><div class="stat-label">Districts</div><div class="stat-value">${new Set([...allKIA,...allINS,...allCiv].map(r=>r.district).filter(Boolean)).size}</div></div>
     <div class="stat-card"><div class="stat-label">Exchange Ratio</div><div class="stat-value purple">${effRatio}</div><div class="stat-trend flat">neutralized per KIA lost</div></div>
     <div class="stat-card">
@@ -4658,8 +4746,8 @@ function renderCounter(){
     <div class="counter-card" style="background:var(--surface);border-color:var(--border-strong);">
       <div class="counter-card-name">Total Amaan Lashkar</div>
       <div class="counter-card-nums">
-        <span><span class="counter-card-num kia">${lashkarKIA}</span><span class="counter-card-num-label">KIA</span></span>
-        <span><span class="counter-card-num wia">${lashkarWIA}</span><span class="counter-card-num-label">WIA</span></span>
+        <div class="counter-card-metric"><div class="counter-card-num-label">KIA</div><div class="counter-card-num kia">${lashkarKIA}</div></div>
+        <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${lashkarWIA}</div></div>
       </div>
     </div>`;
   document.getElementById('counter-lashkar-grid').innerHTML = (lashkarKIA===0 && lashkarWIA===0)
@@ -4667,8 +4755,8 @@ function renderCounter(){
     : `<div class="counter-card">
         <div class="counter-card-name">Amaan Lashkar</div>
         <div class="counter-card-nums">
-          <span><span class="counter-card-num kia">${lashkarKIA}</span><span class="counter-card-num-label">KIA</span></span>
-          <span><span class="counter-card-num wia">${lashkarWIA}</span><span class="counter-card-num-label">WIA</span></span>
+          <div class="counter-card-metric"><div class="counter-card-num-label">KIA</div><div class="counter-card-num kia">${lashkarKIA}</div></div>
+          <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${lashkarWIA}</div></div>
         </div>
       </div>`;
 
@@ -4760,6 +4848,7 @@ function renderCounter(){
 
   onCounterProvinceChange(true);
   populateSavedViewsDropdown();
+  renderUnitVsGroup();
   renderComparePeriods();
 }
 
@@ -4796,8 +4885,8 @@ function renderCivGrid(){
     <div class="counter-card" style="background:var(--surface);border-color:var(--border-strong);">
       <div class="counter-card-name">Civilians</div>
       <div class="counter-card-nums">
-        <span><span class="counter-card-num kia">${killed}</span><span class="counter-card-num-label">Killed</span></span>
-        <span><span class="counter-card-num wia">${wounded}</span><span class="counter-card-num-label">Wounded</span></span>
+        <div class="counter-card-metric"><div class="counter-card-num-label">Killed</div><div class="counter-card-num kia">${killed}</div></div>
+        <div class="counter-card-metric"><div class="counter-card-num-label">Wounded</div><div class="counter-card-num wia">${wounded}</div></div>
       </div>
     </div>
   `;
@@ -4815,15 +4904,21 @@ function renderCivGrid(){
     const insByGroupScope = _counterAllINS.filter(groupScope);
     const killedByGroup = {}, woundedByGroup = {};
     civByGroupScope.forEach(r=>{ const g=r.group||'Unattributed'; killedByGroup[g]=(killedByGroup[g]||0)+(r.killed||0); woundedByGroup[g]=(woundedByGroup[g]||0)+(r.wounded||0); });
-    [...kiaByGroupScope,...insByGroupScope].forEach(r=>{ const g=r.group||(r.groups||[]).join(', ')||'Unattributed'; killedByGroup[g]=(killedByGroup[g]||0)+(r.civ_killed||0); woundedByGroup[g]=(woundedByGroup[g]||0)+(r.civ_wounded||0); });
+    [...kiaByGroupScope,...insByGroupScope].forEach(r=>{
+      const groups = r.group ? [r.group] : ((r.groups||[]).length ? r.groups : ['Unattributed']);
+      groups.forEach(g=>{
+        killedByGroup[g]=(killedByGroup[g]||0)+(r.civ_killed||0);
+        woundedByGroup[g]=(woundedByGroup[g]||0)+(r.civ_wounded||0);
+      });
+    });
     const groupKeys = Object.keys(killedByGroup).filter(g=>killedByGroup[g]>0||woundedByGroup[g]>0).sort((a,b)=>killedByGroup[b]-killedByGroup[a]);
     document.getElementById('counter-civ-group-grid').innerHTML = groupKeys.length
       ? groupKeys.map(g=>`
           <div class="counter-card">
             <div class="counter-card-name">${esc(g)}</div>
             <div class="counter-card-nums">
-              <span><span class="counter-card-num kia" style="color:#8a6a3f">${killedByGroup[g]}</span><span class="counter-card-num-label">Killed</span></span>
-              <span><span class="counter-card-num wia" style="color:#9c7a45">${woundedByGroup[g]||0}</span><span class="counter-card-num-label">Wounded</span></span>
+              <div class="counter-card-metric"><div class="counter-card-num-label">Killed</div><div class="counter-card-num kia" style="color:#8a6a3f">${killedByGroup[g]}</div></div>
+              <div class="counter-card-metric"><div class="counter-card-num-label">Wounded</div><div class="counter-card-num wia" style="color:#9c7a45">${woundedByGroup[g]||0}</div></div>
             </div>
           </div>`).join('')
       : '<div class="counter-empty">No civilian casualties attributed to a group yet</div>';
@@ -4848,8 +4943,8 @@ function renderCivGrid(){
           <div class="counter-card">
             <div class="counter-card-name">${esc(p)}</div>
             <div class="counter-card-nums">
-              <span><span class="counter-card-num kia" style="color:#8a6a3f">${killedByProv[p]}</span><span class="counter-card-num-label">Killed</span></span>
-              <span><span class="counter-card-num wia" style="color:#9c7a45">${woundedByProv[p]||0}</span><span class="counter-card-num-label">Wounded</span></span>
+              <div class="counter-card-metric"><div class="counter-card-num-label">Killed</div><div class="counter-card-num kia" style="color:#8a6a3f">${killedByProv[p]}</div></div>
+              <div class="counter-card-metric"><div class="counter-card-num-label">Wounded</div><div class="counter-card-num wia" style="color:#9c7a45">${woundedByProv[p]||0}</div></div>
             </div>
           </div>`).join('')
       : '<div class="counter-empty">No civilian casualties recorded yet</div>';
@@ -5183,8 +5278,8 @@ function renderProvDistCounters(){
           <div class="counter-card">
             <div class="counter-card-name">${esc(p)}</div>
             <div class="counter-card-nums">
-              <span><span class="counter-card-num kia">${kiaP[p]||0}</span><span class="counter-card-num-label">${kiaLabel}</span></span>
-              <span><span class="counter-card-num" style="color:#5c7a52">${neuP[p]||0}</span><span class="counter-card-num-label">Neutralized</span></span>
+              <div class="counter-card-metric"><div class="counter-card-num-label">${kiaLabel}</div><div class="counter-card-num kia">${kiaP[p]||0}</div></div>
+              <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num" style="color:#5c7a52">${neuP[p]||0}</div></div>
             </div>
           </div>`).join('')
       : '<div class="counter-empty">No activity recorded yet</div>';
@@ -5210,8 +5305,8 @@ function renderProvDistCounters(){
           <div class="counter-card">
             <div class="counter-card-name">${esc(d)}</div>
             <div class="counter-card-nums">
-              <span><span class="counter-card-num kia">${kiaD[d]||0}</span><span class="counter-card-num-label">${kiaLabel}</span></span>
-              <span><span class="counter-card-num" style="color:#5c7a52">${neuD[d]||0}</span><span class="counter-card-num-label">Neutralized</span></span>
+              <div class="counter-card-metric"><div class="counter-card-num-label">${kiaLabel}</div><div class="counter-card-num kia">${kiaD[d]||0}</div></div>
+              <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num" style="color:#5c7a52">${neuD[d]||0}</div></div>
             </div>
           </div>`).join('')
       : '<div class="counter-empty">No activity recorded yet</div>';
@@ -5245,8 +5340,8 @@ function renderProvDistCounters(){
               <div class="counter-card">
                 <div class="counter-card-name">${esc(u)}</div>
                 <div class="counter-card-nums">
-                  <span><span class="counter-card-num kia">${unitKia[u]}</span><span class="counter-card-num-label">KIA</span></span>
-                  <span><span class="counter-card-num wia">${unitWia[u]||0}</span><span class="counter-card-num-label">WIA</span></span>
+                  <div class="counter-card-metric"><div class="counter-card-num-label">KIA</div><div class="counter-card-num kia">${unitKia[u]}</div></div>
+                  <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${unitWia[u]||0}</div></div>
                 </div>
               </div>`).join('')
           : '<div class="counter-empty">No GSF casualties attributed to this group yet</div>';
@@ -5269,8 +5364,8 @@ function renderProvDistCounters(){
               <div class="counter-card">
                 <div class="counter-card-name">${esc(u)}</div>
                 <div class="counter-card-nums">
-                  <span><span class="counter-card-num kia">${unitNeu[u]}</span><span class="counter-card-num-label">Neutralized</span></span>
-                  <span><span class="counter-card-num wia">${unitInsWia[u]||0}</span><span class="counter-card-num-label">WIA</span></span>
+                  <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia">${unitNeu[u]}</div></div>
+                  <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${unitInsWia[u]||0}</div></div>
                 </div>
               </div>`).join('')
           : '<div class="counter-empty">No neutralizations of this group attributed to a unit yet</div>';
@@ -5309,8 +5404,8 @@ function renderProvDistCounters(){
             <div class="counter-card">
               <div class="counter-card-name">${esc(k)}</div>
               <div class="counter-card-nums">
-                <span><span class="counter-card-num kia">${provGeo.kiaBy[k]||0}</span><span class="counter-card-num-label">${geoKiaLabel}</span></span>
-                <span><span class="counter-card-num wia" style="color:#8a6a3f">${provGeo.civBy[k]||0}</span><span class="counter-card-num-label">Civ Killed</span></span>
+                <div class="counter-card-metric"><div class="counter-card-num-label">${geoKiaLabel}</div><div class="counter-card-num kia">${provGeo.kiaBy[k]||0}</div></div>
+                <div class="counter-card-metric"><div class="counter-card-num-label">Civ Killed</div><div class="counter-card-num wia" style="color:#8a6a3f">${provGeo.civBy[k]||0}</div></div>
               </div>
             </div>`).join('')
         : '<div class="counter-empty">No damage recorded from this group yet</div>';
@@ -5321,8 +5416,8 @@ function renderProvDistCounters(){
             <div class="counter-card">
               <div class="counter-card-name">${esc(k)}</div>
               <div class="counter-card-nums">
-                <span><span class="counter-card-num kia">${distGeo.kiaBy[k]||0}</span><span class="counter-card-num-label">${geoKiaLabel}</span></span>
-                <span><span class="counter-card-num wia" style="color:#8a6a3f">${distGeo.civBy[k]||0}</span><span class="counter-card-num-label">Civ Killed</span></span>
+                <div class="counter-card-metric"><div class="counter-card-num-label">${geoKiaLabel}</div><div class="counter-card-num kia">${distGeo.kiaBy[k]||0}</div></div>
+                <div class="counter-card-metric"><div class="counter-card-num-label">Civ Killed</div><div class="counter-card-num wia" style="color:#8a6a3f">${distGeo.civBy[k]||0}</div></div>
               </div>
             </div>`).join('')
         : '<div class="counter-empty">No damage recorded from this group yet</div>';
@@ -5370,8 +5465,8 @@ function renderProvDistCounters(){
               <div class="counter-card">
                 <div class="counter-card-name">${esc(k)}</div>
                 <div class="counter-card-nums">
-                  <span><span class="counter-card-num kia" style="color:#5c7a52">${neuByGrp[k]}</span><span class="counter-card-num-label">Neutralized</span></span>
-                  <span><span class="counter-card-num wia">${wiaByGrp[k]||0}</span><span class="counter-card-num-label">WIA</span></span>
+                  <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia" style="color:#5c7a52">${neuByGrp[k]}</div></div>
+                  <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${wiaByGrp[k]||0}</div></div>
                 </div>
               </div>`).join('')
           : `<div class="counter-empty">No groups neutralized by ${esc(unit)} recorded yet</div>`;
@@ -5383,8 +5478,8 @@ function renderProvDistCounters(){
             <div class="counter-card">
               <div class="counter-card-name">${esc(k)}</div>
               <div class="counter-card-nums">
-                <span><span class="counter-card-num kia" style="color:#5c7a52">${provNeuGeo.neuBy[k]}</span><span class="counter-card-num-label">Neutralized</span></span>
-                <span><span class="counter-card-num wia">${provNeuGeo.wiaBy[k]||0}</span><span class="counter-card-num-label">WIA</span></span>
+                <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia" style="color:#5c7a52">${provNeuGeo.neuBy[k]}</div></div>
+                <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${provNeuGeo.wiaBy[k]||0}</div></div>
               </div>
             </div>`).join('')
         : `<div class="counter-empty">No neutralizations by ${esc(unit)} recorded yet</div>`;
@@ -5395,8 +5490,8 @@ function renderProvDistCounters(){
             <div class="counter-card">
               <div class="counter-card-name">${esc(k)}</div>
               <div class="counter-card-nums">
-                <span><span class="counter-card-num kia" style="color:#5c7a52">${distNeuGeo.neuBy[k]}</span><span class="counter-card-num-label">Neutralized</span></span>
-                <span><span class="counter-card-num wia">${distNeuGeo.wiaBy[k]||0}</span><span class="counter-card-num-label">WIA</span></span>
+                <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia" style="color:#5c7a52">${distNeuGeo.neuBy[k]}</div></div>
+                <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${distNeuGeo.wiaBy[k]||0}</div></div>
               </div>
             </div>`).join('')
         : `<div class="counter-empty">No neutralizations by ${esc(unit)} recorded yet</div>`;
@@ -5405,6 +5500,189 @@ function renderProvDistCounters(){
     }
   } else {
     breakdownEl.style.display = 'none';
+  }
+}
+
+// Standalone "Unit vs Group" tab — same Head-to-Head cross-reference as
+// Provinces & Districts, but scoped only by unit/group (no province/district),
+// so it answers "who has fought whom" without needing to pick a location first
+function renderUnitVsGroup(){
+  const unit = document.getElementById('counter-uvg-unit').value;
+  const group = document.getElementById('counter-uvg-group').value;
+
+  const unitsList = getMergedList('units', UNITS).map(normalizeUnitName);
+  const groupsList = getMergedList('groups', GROUPS);
+  const uvgUnitSel = document.getElementById('counter-uvg-unit');
+  const prevUvgUnit = uvgUnitSel.value;
+  uvgUnitSel.innerHTML = '<option value="">All units</option>' + unitsList.map(u=>`<option value="${esc(u)}">${esc(u)}</option>`).join('');
+  uvgUnitSel.value = unitsList.includes(prevUvgUnit) ? prevUvgUnit : '';
+  const uvgGroupSel = document.getElementById('counter-uvg-group');
+  const prevUvgGroup = uvgGroupSel.value;
+  uvgGroupSel.innerHTML = '<option value="">All groups</option>' + groupsList.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('');
+  uvgGroupSel.value = groupsList.includes(prevUvgGroup) ? prevUvgGroup : '';
+
+  const defaultEl = document.getElementById('counter-uvg-default');
+  const pairEl = document.getElementById('counter-uvg-pair');
+  const contentEl = document.getElementById('counter-uvg-content');
+  const kia = _counterAllKIA, ins = _counterAllINS;
+
+  // ── Both a unit AND a group picked: show only their direct record together,
+  // not the broader "every group this unit fought" / "every unit this group
+  // fought" breakdowns — that's the noise this view is meant to avoid
+  if(unit && group){
+    defaultEl.style.display = 'none';
+    contentEl.style.display = 'none';
+    pairEl.style.display = 'block';
+    document.getElementById('counter-uvg-pair-heading').textContent = `${unit} vs ${group}`;
+
+    let takenKia=0, takenWia=0;
+    kia.forEach(r=>(Array.isArray(r.breakdown)?r.breakdown:[]).forEach(b=>{
+      if(normalizeUnitName(b.type)===unit && b.group===group){ takenKia+=parseInt(b.kia)||0; takenWia+=parseInt(b.wia)||0; }
+    }));
+    let neu=0, neuWia=0;
+    ins.forEach(r=>(Array.isArray(r.breakdown)?r.breakdown:[]).forEach(b=>{
+      if(normalizeUnitName(b.unit)===unit && b.group===group){ neu+=parseInt(b.kia)||0; neuWia+=parseInt(b.wia)||0; }
+    }));
+
+    document.getElementById('counter-uvg-pair-grid').innerHTML = `
+      <div class="counter-card">
+        <div class="counter-card-name">${esc(unit)} — casualties from ${esc(group)}</div>
+        <div class="counter-card-nums">
+          <div class="counter-card-metric"><div class="counter-card-num-label">KIA</div><div class="counter-card-num kia">${takenKia}</div></div>
+          <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${takenWia}</div></div>
+        </div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-card-name">${esc(group)} — neutralized by ${esc(unit)}</div>
+        <div class="counter-card-nums">
+          <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia" style="color:#5c7a52">${neu}</div></div>
+          <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${neuWia}</div></div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // ── Neither picked: show a full overview — every unit's totals, every
+  // group's totals — instead of an empty prompt
+  if(!unit && !group){
+    pairEl.style.display = 'none';
+    contentEl.style.display = 'none';
+    defaultEl.style.display = 'block';
+
+    const { kia: kiaByType, wia: wiaByType, neu: neuByUnit, neuWia: neuWiaByUnit } = _counterPGSF;
+    const unitKeys = Object.keys(kiaByType).filter(t=>t!=='Amaan Lashkar' && (kiaByType[t]>0||wiaByType[t]>0||(neuByUnit[t]||0)>0||(neuWiaByUnit[t]||0)>0))
+      .sort((a,b)=>(kiaByType[b]+wiaByType[b])-(kiaByType[a]+wiaByType[a]));
+    document.getElementById('counter-uvg-default-units').innerHTML = unitKeys.length ? unitKeys.map(u=>`
+      <div class="counter-card">
+        <div class="counter-card-name">${esc(u)}</div>
+        <div class="counter-card-nums">
+          <div class="counter-card-metric"><div class="counter-card-num-label">KIA</div><div class="counter-card-num kia">${kiaByType[u]}</div></div>
+          <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${wiaByType[u]}</div></div>
+        </div>
+        <div class="counter-card-nums">
+          <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia" style="color:#5c7a52">${neuByUnit[u]||0}</div></div>
+          <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${neuWiaByUnit[u]||0}</div></div>
+        </div>
+      </div>`).join('') : '<div class="counter-empty">No unit data yet</div>';
+
+    const { neu: neuByGroup, wia: insWiaByGroup, gsfKia: gsfKiaByGroup, gsfWia: gsfWiaByGroup } = _counterGroups;
+    const groupKeys = Object.keys(neuByGroup).filter(g=>neuByGroup[g]>0||insWiaByGroup[g]>0||(gsfKiaByGroup[g]||0)>0||(gsfWiaByGroup[g]||0)>0)
+      .sort((a,b)=>neuByGroup[b]-neuByGroup[a]);
+    document.getElementById('counter-uvg-default-groups').innerHTML = groupKeys.length ? groupKeys.map(g=>`
+      <div class="counter-card">
+        <div class="counter-card-name">${esc(g)}</div>
+        <div class="counter-card-nums">
+          <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia" style="color:#5c7a52">${neuByGroup[g]}</div></div>
+          <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${insWiaByGroup[g]}</div></div>
+        </div>
+        <div class="counter-card-nums">
+          <div class="counter-card-metric"><div class="counter-card-num-label">GSF KIA</div><div class="counter-card-num kia">${gsfKiaByGroup[g]||0}</div></div>
+          <div class="counter-card-metric"><div class="counter-card-num-label">GSF WIA</div><div class="counter-card-num wia">${gsfWiaByGroup[g]||0}</div></div>
+        </div>
+      </div>`).join('') : '<div class="counter-empty">No group data yet</div>';
+    return;
+  }
+
+  // ── Only one of the two picked: show that entity's full head-to-head record
+  defaultEl.style.display = 'none';
+  pairEl.style.display = 'none';
+  contentEl.style.display = 'block';
+
+  // Which units has this group killed/wounded, and which units neutralized it
+  const groupSection = document.getElementById('counter-uvg-unit-breakdowns');
+  if(group){
+    groupSection.style.display = 'block';
+    const unitKia = {}, unitWia = {};
+    kia.forEach(r=>{
+      (Array.isArray(r.breakdown)?r.breakdown:[]).forEach(b=>{
+        if(b.group !== group) return;
+        const u = normalizeUnitName(b.type); if(!u) return;
+        unitKia[u] = (unitKia[u]||0) + (parseInt(b.kia)||0);
+        unitWia[u] = (unitWia[u]||0) + (parseInt(b.wia)||0);
+      });
+    });
+    const hitUnits = Object.keys(unitKia).filter(u=>unitKia[u]>0||unitWia[u]>0).sort((a,b)=>(unitKia[b]+unitWia[b])-(unitKia[a]+unitWia[a]));
+    document.getElementById('counter-uvg-grid-1').innerHTML = hitUnits.length
+      ? hitUnits.map(u=>`
+          <div class="counter-card">
+            <div class="counter-card-name">${esc(u)}</div>
+            <div class="counter-card-nums">
+              <div class="counter-card-metric"><div class="counter-card-num-label">KIA</div><div class="counter-card-num kia">${unitKia[u]}</div></div>
+              <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${unitWia[u]||0}</div></div>
+            </div>
+          </div>`).join('')
+      : `<div class="counter-empty">No GSF casualties attributed to ${esc(group)} yet</div>`;
+
+    const unitNeu = {}, unitNeuWia = {};
+    ins.forEach(r=>{
+      (Array.isArray(r.breakdown)?r.breakdown:[]).forEach(b=>{
+        if(b.group !== group) return;
+        const u = normalizeUnitName(b.unit) || 'Unattributed';
+        unitNeu[u] = (unitNeu[u]||0) + (parseInt(b.kia)||0);
+        unitNeuWia[u] = (unitNeuWia[u]||0) + (parseInt(b.wia)||0);
+      });
+    });
+    const neuUnits = Object.keys(unitNeu).filter(u=>unitNeu[u]>0||unitNeuWia[u]>0).sort((a,b)=>(unitNeu[b]+unitNeuWia[b])-(unitNeu[a]+unitNeuWia[a]));
+    document.getElementById('counter-uvg-grid-2').innerHTML = neuUnits.length
+      ? neuUnits.map(u=>`
+          <div class="counter-card">
+            <div class="counter-card-name">${esc(u)}</div>
+            <div class="counter-card-nums">
+              <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia" style="color:#5c7a52">${unitNeu[u]}</div></div>
+              <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${unitNeuWia[u]||0}</div></div>
+            </div>
+          </div>`).join('')
+      : `<div class="counter-empty">No units credited with neutralizing ${esc(group)} yet</div>`;
+  } else {
+    groupSection.style.display = 'none';
+  }
+
+  // Which groups has this unit neutralized
+  const unitSection = document.getElementById('counter-uvg-group-breakdowns');
+  if(unit){
+    unitSection.style.display = 'block';
+    const neuByGrp = {}, wiaByGrp = {};
+    ins.forEach(r=>{
+      (Array.isArray(r.breakdown)?r.breakdown:[]).forEach(b=>{
+        if(normalizeUnitName(b.unit) !== unit) return;
+        const g = b.group || 'Unknown';
+        neuByGrp[g] = (neuByGrp[g]||0) + (parseInt(b.kia)||0);
+        wiaByGrp[g] = (wiaByGrp[g]||0) + (parseInt(b.wia)||0);
+      });
+    });
+    const grpKeys = Object.keys(neuByGrp).filter(k=>(neuByGrp[k]||0)>0||(wiaByGrp[k]||0)>0).sort((a,b)=>(neuByGrp[b]+(wiaByGrp[b]||0))-(neuByGrp[a]+(wiaByGrp[a]||0)));
+    document.getElementById('counter-uvg-grid-3').innerHTML = grpKeys.length
+      ? grpKeys.map(k=>`
+          <div class="counter-card">
+            <div class="counter-card-name">${esc(k)}</div>
+            <div class="counter-card-nums">
+              <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia" style="color:#5c7a52">${neuByGrp[k]}</div></div>
+              <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${wiaByGrp[k]||0}</div></div>
+            </div>
+          </div>`).join('')
+      : `<div class="counter-empty">No groups neutralized by ${esc(unit)} recorded yet</div>`;
+  } else {
+    unitSection.style.display = 'none';
   }
 }
 
@@ -5420,8 +5698,8 @@ function renderPGSFGrid(){
     <div class="counter-card" style="background:var(--surface);border-color:var(--border-strong);">
       <div class="counter-card-name">Total GSF (all units)</div>
       <div class="counter-card-nums">
-        <span><span class="counter-card-num kia">${trueTotalKIA}</span><span class="counter-card-num-label">KIA</span></span>
-        <span><span class="counter-card-num wia">${trueTotalWIA}</span><span class="counter-card-num-label">WIA</span></span>
+        <div class="counter-card-metric"><div class="counter-card-num-label">KIA</div><div class="counter-card-num kia">${trueTotalKIA}</div></div>
+        <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${trueTotalWIA}</div></div>
       </div>
     </div>`;
   if(!branches.length){
@@ -5436,12 +5714,12 @@ function renderPGSFGrid(){
         <div class="counter-card">
           <div class="counter-card-name">${esc(t)}</div>
           <div class="counter-card-nums">
-            <span><span class="counter-card-num kia">${kiaByType[t]}</span><span class="counter-card-num-label">KIA</span><span class="counter-card-pct">${pct}%</span></span>
-            <span><span class="counter-card-num wia">${wiaByType[t]}</span><span class="counter-card-num-label">WIA</span></span>
+            <div class="counter-card-metric"><div class="counter-card-num-label">KIA <span class="counter-card-pct">${pct}%</span></div><div class="counter-card-num kia">${kiaByType[t]}</div></div>
+            <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${wiaByType[t]}</div></div>
           </div>
           <div class="counter-card-nums" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
-            <span><span class="counter-card-num" style="color:#5c7a52">${neu}</span><span class="counter-card-num-label">Neutralized</span></span>
-            <span><span class="counter-card-num" style="color:#5c7a52">${neuWia}</span><span class="counter-card-num-label">Ins. WIA</span></span>
+            <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num" style="color:#5c7a52">${neu}</div></div>
+            <div class="counter-card-metric"><div class="counter-card-num-label">Ins. WIA</div><div class="counter-card-num" style="color:#5c7a52">${neuWia}</div></div>
           </div>
         </div>`;}).join('');
   }
@@ -5461,8 +5739,8 @@ function renderGroupsGrid(){
     <div class="counter-card" style="background:var(--surface);border-color:var(--border-strong);">
       <div class="counter-card-name">Total Insurgents (all groups)</div>
       <div class="counter-card-nums">
-        <span><span class="counter-card-num kia">${totalGroupNeu}</span><span class="counter-card-num-label">Neutralized</span></span>
-        <span><span class="counter-card-num wia">${totalGroupWIA}</span><span class="counter-card-num-label">WIA</span></span>
+        <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized</div><div class="counter-card-num kia">${totalGroupNeu}</div></div>
+        <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${totalGroupWIA}</div></div>
       </div>
     </div>`;
   if(!groups.length){
@@ -5477,12 +5755,12 @@ function renderGroupsGrid(){
         <div class="counter-card">
           <div class="counter-card-name">${esc(g)}</div>
           <div class="counter-card-nums">
-            <span><span class="counter-card-num kia">${neuByGroup[g]}</span><span class="counter-card-num-label">Neutralized</span><span class="counter-card-pct">${pct}%</span></span>
-            <span><span class="counter-card-num wia">${insWiaByGroup[g]}</span><span class="counter-card-num-label">WIA</span></span>
+            <div class="counter-card-metric"><div class="counter-card-num-label">Neutralized <span class="counter-card-pct">${pct}%</span></div><div class="counter-card-num kia">${neuByGroup[g]}</div></div>
+            <div class="counter-card-metric"><div class="counter-card-num-label">WIA</div><div class="counter-card-num wia">${insWiaByGroup[g]}</div></div>
           </div>
           <div class="counter-card-nums" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
-            <span><span class="counter-card-num" style="color:#a13d3d">${gsfKia}</span><span class="counter-card-num-label">GSF KIA</span></span>
-            <span><span class="counter-card-num" style="color:#a13d3d">${gsfWia}</span><span class="counter-card-num-label">GSF WIA</span></span>
+            <div class="counter-card-metric"><div class="counter-card-num-label">GSF KIA</div><div class="counter-card-num" style="color:#a13d3d">${gsfKia}</div></div>
+            <div class="counter-card-metric"><div class="counter-card-num-label">GSF WIA</div><div class="counter-card-num" style="color:#a13d3d">${gsfWia}</div></div>
           </div>
         </div>`;}).join('');
   }
@@ -5977,14 +6255,20 @@ function getFilteredMapData() {
   const out = [];
   if(showKIA) kiaData.filter(r=>r.district&&DISTRICT_COORDS[r.district]&&inDateRange(r.date||'',range)&&!(r.personnel||[]).includes('Amaan Lashkar')).forEach(r=>out.push({...r,_type:'kia'}));
   if(showLashkar) kiaData.filter(r=>r.district&&DISTRICT_COORDS[r.district]&&inDateRange(r.date||'',range)&&(r.personnel||[]).includes('Amaan Lashkar')).forEach(r=>out.push({...r,_type:'kia'}));
-  if(showINS) insData.filter(r=>r.district&&DISTRICT_COORDS[r.district]&&inDateRange(r.date||'',range)).forEach(r=>out.push({...r,_type:'ins'}));
+  if(showINS) insData.filter(r=>r.district&&DISTRICT_COORDS[r.district]&&inDateRange(r.date||'',range)&&!insHasUnit(r,'Amaan Lashkar')).forEach(r=>out.push({...r,_type:'ins'}));
+  if(showLashkar) insData.filter(r=>r.district&&DISTRICT_COORDS[r.district]&&inDateRange(r.date||'',range)&&insHasUnit(r,'Amaan Lashkar')).forEach(r=>out.push({...r,_type:'ins'}));
   const showCIV = document.getElementById('layer-civ')?.checked;
   if(showCIV) {
-    // Add civ-casualty markers from existing kia/ins records that have civ_killed/wounded
+    // Add civ-casualty markers from existing kia/ins records that have civ_killed/wounded.
+    // Respect the same Amaan Lashkar toggle as the KIA/INS layers above, so
+    // switching that layer off consistently hides everything tied to it,
+    // civilian markers included — otherwise its incidents would still count.
+    const isLashkarRecord = r => r._recordType==='kia' ? (r.personnel||[]).includes('Amaan Lashkar') : insHasUnit(r,'Amaan Lashkar');
     [...kiaData,...insData].filter(r=>
       r.district && DISTRICT_COORDS[r.district] &&
       inDateRange(r.date||'',range) &&
-      ((r.civ_killed||0) > 0 || (r.civ_wounded||0) > 0)
+      ((r.civ_killed||0) > 0 || (r.civ_wounded||0) > 0) &&
+      (isLashkarRecord(r) ? showLashkar : true)
     ).forEach(r=>out.push({...r, _type:'civ', _sourceType:r._recordType, kia:r.civ_killed||0, wia:r.civ_wounded||0}));
   }
   return out;
@@ -7404,10 +7688,11 @@ function updateHeaderSummary() {
   const isLashkar = r => (r.personnel||[]).includes('Amaan Lashkar');
   const pgsfEntries = kiaData.filter(r=>!isLashkar(r));
   const lashkarEntries = kiaData.filter(isLashkar);
+  const pgsfIns = insData.filter(r=>!insHasUnit(r,'Amaan Lashkar'));
   const totalKIA = pgsfEntries.reduce((s,r)=>s+(r.kia||0),0);
   const totalLashkarKIA = lashkarEntries.reduce((s,r)=>s+(r.kia||0),0);
-  const totalNeu = insData.reduce((s,r)=>s+(r.kia||0),0);
-  const totalInc = pgsfEntries.length + insData.length; // matches Incidents tab, which now excludes Amaan Lashkar
+  const totalNeu = pgsfIns.reduce((s,r)=>s+(r.kia||0),0);
+  const totalInc = pgsfEntries.length + pgsfIns.length; // matches Incidents + Insurgents tabs, both of which exclude Amaan Lashkar
   const totalCivKilled = kiaData.reduce((s,r)=>s+(r.civ_killed||0),0) + insData.reduce((s,r)=>s+(r.civ_killed||0),0);
   const el = document.getElementById('header-summary');
   const elMobile = document.getElementById('header-summary-mobile');
