@@ -2,6 +2,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>Frontier Pakistan Tracker</title>
+
+<!-- PWA: makes this installable as an app on phone home screens -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Frontier Tracker">
+<meta name="mobile-web-app-capable" content="yes">
+
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Playfair+Display:wght@700;800&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -159,6 +170,41 @@ body { font-family: var(--font); background: var(--bg); color: var(--text-primar
 .tab-btn.tab-clusters.active { color: #7a7048; border-bottom-color: #7a7048; }
 .tab-btn.tab-log.active { color: #8a6a3f; border-bottom-color: #8a6a3f; }
 body.dark .tab-btn.active { color: #e8e6f0; border-bottom-color: #e8e6f0; }
+
+/* ── MOBILE BOTTOM NAV (hidden by default, shown only on phone widths) ── */
+.mobile-bottom-nav { display: none; }
+.mobile-nav-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; flex: 1; padding: 8px 4px 7px; background: none; border: none;
+  border-top: 2px solid transparent; color: var(--text-muted); cursor: pointer;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.02em; text-transform: uppercase;
+}
+.mobile-nav-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.mobile-nav-btn.active { color: var(--text-primary); border-top-color: var(--text-primary); }
+.mobile-more-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9997; background: rgba(0,0,0,0.6);
+  align-items: flex-end;
+}
+.mobile-more-overlay.open { display: flex; }
+.mobile-more-sheet {
+  width: 100%; background: var(--surface); border-top: 1px solid var(--border);
+  max-height: 70vh; overflow-y: auto;
+}
+.mobile-more-header {
+  display: flex; align-items: center; justify-content: space-between; padding: 16px 18px;
+  border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 12px;
+  font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-primary);
+}
+.mobile-more-close { background: none; border: 1px solid var(--border-strong); color: var(--text-primary); padding: 6px; cursor: pointer; display: flex; }
+.mobile-more-list { display: flex; flex-direction: column; }
+.mobile-more-list button {
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: none;
+  border: none; border-bottom: 1px solid var(--border); color: var(--text-primary);
+  font-family: var(--mono); font-size: 13px; text-align: left; cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.mobile-more-list button svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+.mobile-more-list button:active { background: var(--surface2); }
 
 
 
@@ -988,29 +1034,22 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
   .header-clock { display: none; }
   .live-pill { gap: 4px; font-size: 10px; }
 
-  /* Tab nav — horizontal scroll, no wrap */
-  .tab-nav {
-    padding: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    white-space: nowrap;
-    display: flex;
-    flex-wrap: nowrap;
-  }
-  .tab-nav::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    padding: 12px 14px;
-    font-size: 11px;
-    gap: 5px;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-  .tab-btn svg { width: 12px; height: 12px; }
+  /* Tab nav — replaced by the icon bottom nav on mobile */
+  .tab-nav { display: none; }
 
-  /* Page padding */
-  .page { padding: 14px 12px; }
+  /* Bottom icon nav bar, fixed to the bottom like a native app */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 9996;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  /* Page padding, plus room at the bottom so content isn't hidden behind the fixed bar */
+  .page { padding: 14px 12px; padding-bottom: calc(64px + env(safe-area-inset-bottom, 0)); }
 
   /* Stat cards — 2 columns always */
   .stats-row {
@@ -1287,6 +1326,52 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
     Data Entry
   </button>
 </nav>
+
+<!-- ── MOBILE BOTTOM NAV (phone-width only) ─────────────────── -->
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <button class="mobile-nav-btn active" data-tab="live" onclick="switchTab('live',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" fill="currentColor"></circle><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M5.5 5.5a9 9 0 0 0 0 13M18.5 5.5a9 9 0 0 1 0 13"></path></svg>
+    <span>Live</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab="counter" onclick="switchTab('counter',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+    <span>Counter</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab="map" onclick="switchTab('map',this)">
+    <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+    <span>Map</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab="entry" onclick="switchTab('entry',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+    <span>Entry</span>
+  </button>
+  <button class="mobile-nav-btn" id="mobile-nav-more-btn" onclick="toggleMoreMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"></circle><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"></circle></svg>
+    <span>More</span>
+  </button>
+</nav>
+
+<div class="mobile-more-overlay" id="mobile-more-overlay" onclick="if(event.target===this) toggleMoreMenu()">
+  <div class="mobile-more-sheet">
+    <div class="mobile-more-header">
+      <span>More</span>
+      <button class="mobile-more-close" onclick="toggleMoreMenu()">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="mobile-more-list">
+      <button onclick="switchTab('kia',this)"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>Incidents</button>
+      <button onclick="switchTab('lashkar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5z"></path></svg>Amaan Lashkar</button>
+      <button onclick="switchTab('ins',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>Insurgents</button>
+      <button onclick="switchTab('civ',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Civilians</button>
+      <button onclick="switchTab('analytics',this)"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line><line x1="2" y1="20" x2="22" y2="20"></line></svg>Analytics</button>
+      <button onclick="switchTab('clusters',this)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>Clusters</button>
+      <button onclick="switchTab('deepan',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path><path d="M3.05 11a9 9 0 1 1 .5 4"></path></svg>Deep Analysis</button>
+      <button onclick="switchTab('articles',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"></path></svg>Editorial</button>
+      <button onclick="switchTab('log',this)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>Data Log</button>
+    </div>
+  </div>
+</div>
 
 <div class="page">
 
@@ -2833,9 +2918,33 @@ function switchTab(id, btn){
 function activateTab(id, btn){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
+
+  // Keep both nav representations in sync no matter which one was actually
+  // clicked (desktop strip, mobile bottom bar, or the More sheet)
+  const desktopBtn = document.getElementById('tab-'+id+'-btn');
+  if(desktopBtn) desktopBtn.classList.add('active');
+
+  const primaryMobileIds = ['live','counter','map','entry'];
+  if(primaryMobileIds.includes(id)){
+    const navBtn = document.querySelector('.mobile-nav-btn[data-tab="'+id+'"]');
+    if(navBtn) navBtn.classList.add('active');
+  } else {
+    const moreBtn = document.getElementById('mobile-nav-more-btn');
+    if(moreBtn) moreBtn.classList.add('active');
+  }
+
+  // Close the More sheet if a tab was picked from inside it
+  const moreOverlay = document.getElementById('mobile-more-overlay');
+  if(moreOverlay) moreOverlay.classList.remove('open');
 }
+
+function toggleMoreMenu(){
+  document.getElementById('mobile-more-overlay').classList.toggle('open');
+}
+
 
 // ── AUTH ───────────────────────────────────────────────────────────────────────
 async function doLogin(){
@@ -7221,6 +7330,14 @@ window.addEventListener('hashchange', () => {
 });
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
+// Register service worker for PWA install support (fails silently if unavailable,
+// e.g. when opened as a local file rather than served over http/https)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
 // Restore session and boot app
 (async () => {
   await restoreSession();
