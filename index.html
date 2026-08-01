@@ -2634,11 +2634,11 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
             <div class="ref-list-wrap" id="ref-group-list"></div>
           </div>
 
-          <!-- CI Units -->
+          <!-- Units (shared: Incidents personnel + Insurgents Neutralized CI unit) -->
           <div class="ref-card">
             <div class="ref-card-header">
-              <div class="ref-card-title">Counter-Insurgency Units</div>
-              <div class="ref-card-sub">Units shown in the Insurgents Neutralized form</div>
+              <div class="ref-card-title">Units</div>
+              <div class="ref-card-sub">Government Security Forces branches — shared by both the Incidents and Insurgents Neutralized forms</div>
             </div>
             <div class="ref-input-row">
               <input type="text" class="ref-input" id="ref-new-unit" placeholder="Unit name…">
@@ -2671,19 +2671,6 @@ body.dark .leaflet-bar a:hover { background: #2e2e2e !important; }
               <button class="ref-add-btn" onclick="refAddItem('insEvents', 'ref-new-ins-event', 'ref-ins-event-list')">Add</button>
             </div>
             <div class="ref-list-wrap" id="ref-ins-event-list"></div>
-          </div>
-
-          <!-- Personnel Types -->
-          <div class="ref-card">
-            <div class="ref-card-header">
-              <div class="ref-card-title">Personnel Types</div>
-              <div class="ref-card-sub">Government Security Forces categories shown in the KIA casualties section</div>
-            </div>
-            <div class="ref-input-row">
-              <input type="text" class="ref-input" id="ref-new-personnel" placeholder="Personnel type…">
-              <button class="ref-add-btn" onclick="refAddItem('personnel', 'ref-new-personnel', 'ref-personnel-list')">Add</button>
-            </div>
-            <div class="ref-list-wrap" id="ref-personnel-list"></div>
           </div>
 
         </div>
@@ -2896,9 +2883,13 @@ const PROVINCES = {
 
 const KIA_EVENTS=["Armed Robbery","IED Explosion","Suicide Bombing","Drone Attack (Quadcopter)","FPV Drone Attack","Ambush","Raid","Checkpost Raid","Sabotage","Artillery Attack","Target Killing","Assassination","Kidnapping","Infrastructure Attack","Police Station Attack","Secterian Attack","Sniper fire","Other"];
 const INS_EVENTS=["Drone Attack (Quadcopter)","Explosion","Grenade","Ambush","Exchange of fire","IBO","Counter Attack","Sabotage","Target Killing","Capture","Sniper Fire","Ground Operation","Large Scale Operation","Patrol","Clearence Operation","Search Operation","Detention","Air to Ground Missile (PAF)","Artillery","Other"];
-const INS_UNITS=["FC","Levi","Army","Navy","Air Force","Police","CTD","Amaan Lashkar"];
+// Single shared unit list — used by both the Incidents form (who suffered
+// casualties) and the Insurgents Neutralized form (who gets credit for a
+// neutralization). Previously these were two separate lists ("FC" vs "FC
+// (Frontier Corps)") which silently broke the Counter tab's cross-referencing
+// between a unit's KIA and Neutralized numbers.
+const UNITS=["FC","Levies","Army","Navy","Air Force","Police","CTD","Rangers","Intelligence","Amaan Lashkar"];
 const GROUPS=["TTP","BLA","LEI","TTG","IMP","ISKP","BRAS","BLF","LeJ","SSP","AQIS","Other"];
-const PERSONNEL=["Army","FC (Frontier Corps)","Police","CTD","Navy","Air Force","Levies","Rangers","Intelligence (ISI/IB/MI)","Amaan Lashkar"];
 
 // District → approximate lat/lng for Pakistan
 
@@ -3039,7 +3030,7 @@ function populateOpts(id, list, ph){
 function renderPersonnelGrid(containerId, selected=[]){
   const el = document.getElementById(containerId);
   if(!el) return;
-  el.innerHTML = PERSONNEL.map(p=>{
+  el.innerHTML = UNITS.map(p=>{
     const on = selected.includes(p);
     return `<div class="personnel-chip${on?' selected':''}" data-val="${esc(p)}" onclick="this.classList.toggle('selected')">
       <div class="chip-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
@@ -3058,7 +3049,7 @@ function renderBreakdownRow(kind, rowId, containerId, totalId){
   const onChangeAttr = `onchange="updateBreakdownTotal('${containerId}','${totalId}','${kind}')"`;
   const onInputAttr = `oninput="updateBreakdownTotal('${containerId}','${totalId}','${kind}')"`;
   if(kind === 'kia'){
-    const types = getMergedList('personnel', PERSONNEL);
+    const types = getMergedList('units', UNITS);
     const groups = getMergedList('groups', GROUPS);
     return `<div class="breakdown-row breakdown-row-ins" data-row-id="${rowId}">
       <select class="breakdown-type-select" ${onChangeAttr}>
@@ -3076,7 +3067,7 @@ function renderBreakdownRow(kind, rowId, containerId, totalId){
       </button>
     </div>`;
   } else {
-    const units = getMergedList('units', INS_UNITS);
+    const units = getMergedList('units', UNITS);
     const groups = getMergedList('groups', GROUPS);
     return `<div class="breakdown-row breakdown-row-ins" data-row-id="${rowId}">
       <select class="breakdown-unit-select" ${onChangeAttr}>
@@ -3375,16 +3366,22 @@ async function loadRef() {
     });
     const data = await r.json();
     const saved = (data && data[0] && data[0].value) ? data[0].value : {};
+    // One-time merge: fold any custom entries from the old separate "personnel"
+    // list into "units", since the two are now a single shared list
+    const mergedUnits = [...new Set([...(saved.units||[]), ...(saved.personnel||[])])];
     _refCache = {
       provinces: saved.provinces || {},
       groups:    saved.groups    || [],
-      units:     saved.units     || [],
+      units:     mergedUnits,
       kiaEvents: saved.kiaEvents || [],
-      insEvents: saved.insEvents || [],
-      personnel: saved.personnel || []
+      insEvents: saved.insEvents || []
     };
+    // Persist the merge so it only needs to happen once
+    if(saved.personnel && saved.personnel.length){
+      saveRef(_refCache);
+    }
   } catch(e) {
-    _refCache = { provinces:{}, groups:[], units:[], kiaEvents:[], insEvents:[], personnel:[] };
+    _refCache = { provinces:{}, groups:[], units:[], kiaEvents:[], insEvents:[] };
   }
   return _refCache;
 }
@@ -3404,7 +3401,7 @@ async function saveRef(ref) {
 
 // Sync version using cache — for dropdowns that can't be async
 function loadRefSync() {
-  return _refCache || { provinces:{}, groups:[], units:[], kiaEvents:[], insEvents:[], personnel:[] };
+  return _refCache || { provinces:{}, groups:[], units:[], kiaEvents:[], insEvents:[] };
 }
 
 // Merge hardcoded defaults with user-added custom values
@@ -3465,7 +3462,7 @@ function refreshAllDropdowns() {
   // Groups (used by Reference Data admin list; per-row selects in breakdown rows build their own options)
   const groups = getMergedList('groups', GROUPS);
   // Units (used by Reference Data admin list; per-row selects in breakdown rows build their own options)
-  const units = getMergedList('units', INS_UNITS);
+  const units = getMergedList('units', UNITS);
   // KIA events
   populateOpts('kf-event', getMergedList('kiaEvents', KIA_EVENTS), 'Select type');
   // INS events
@@ -3517,10 +3514,9 @@ async function renderRefPanel() {
 
   // Simple lists
   renderRefList('ref-group-list',     getMergedList('groups',    GROUPS),     GROUPS,     'groups');
-  renderRefList('ref-unit-list',      getMergedList('units',     INS_UNITS),  INS_UNITS,  'units');
+  renderRefList('ref-unit-list',      getMergedList('units',     UNITS),  UNITS,  'units');
   renderRefList('ref-kia-event-list', getMergedList('kiaEvents', KIA_EVENTS), KIA_EVENTS, 'kiaEvents');
   renderRefList('ref-ins-event-list', getMergedList('insEvents', INS_EVENTS), INS_EVENTS, 'insEvents');
-  renderRefList('ref-personnel-list', getMergedList('personnel', PERSONNEL),  PERSONNEL,  'personnel');
 }
 
 function renderRefList(elId, items, defaults, key) {
@@ -3582,14 +3578,12 @@ async function refAddItem(key, inputId, listId) {
   const val = document.getElementById(inputId).value.trim();
   if(!val) return;
   const ref = loadRefSync();
-  const defaults = {groups:GROUPS, units:INS_UNITS, kiaEvents:KIA_EVENTS, insEvents:INS_EVENTS, personnel:PERSONNEL};
+  const defaults = {groups:GROUPS, units:UNITS, kiaEvents:KIA_EVENTS, insEvents:INS_EVENTS};
   const existing = getMergedList(key, defaults[key]);
   if(existing.includes(val)) { alert('Item already exists.'); return; }
   if(!ref[key]) ref[key] = [];
   ref[key].push(val);
   await saveRef(ref);
-  // Update in-memory arrays for personnel
-  if(key==='personnel') PERSONNEL.push(val);
   document.getElementById(inputId).value = '';
   renderRefPanel();
   refreshAllDropdowns();
@@ -4543,7 +4537,7 @@ function renderCounter(){
   `;
 
   // ── By personnel branch (Army, FC, Police, etc.) ──────────────────────────
-  const personnelTypes = getMergedList('personnel', PERSONNEL);
+  const personnelTypes = getMergedList('units', UNITS);
   const kiaByType = {}, wiaByType = {};
   // What each unit has done TO the insurgents (neutralized/wounded), pulled
   // from the Insurgents Neutralized side where that unit is credited.
@@ -4685,10 +4679,7 @@ function renderCounter(){
 
   const pdUnitSel = document.getElementById('counter-pd-unit');
   const prevUnitVal = pdUnitSel.value;
-  const allUnits = [...new Set([
-    ...getMergedList('personnel', PERSONNEL).map(normalizeUnitName),
-    ...getMergedList('units', INS_UNITS).map(normalizeUnitName)
-  ])];
+  const allUnits = getMergedList('units', UNITS).map(normalizeUnitName);
   pdUnitSel.innerHTML = '<option value="">All units</option>' + allUnits.map(u=>`<option value="${esc(u)}">${esc(u)}</option>`).join('');
   pdUnitSel.value = allUnits.includes(prevUnitVal) ? prevUnitVal : '';
 
